@@ -157,12 +157,23 @@ type Message struct {
 	LeftChatMember       User     `json:"left_chat_member"`
 }
 
+type CallbackQuery struct {
+	Id              string  `json:"id"`
+	From            User    `json:"from"`
+	Message         Message `json:"message"`
+	InlineMessageId string  `json:"inline_message_id"`
+	ChatInstance    string  `json:"chat_instance"`
+	Data            string  `json:"data"`
+	GameShortName   string  `json:"game_short_name"`
+}
+
 type Update struct {
-	UpdateId          int64   `json:"update_id"`
-	Message           Message `json:"message"`
-	EditedMessage     Message `json:"edited_message"`
-	ChannelPost       Message `json:"channel_post"`
-	EditedChannelPost Message `json:"edited_channel_post"`
+	UpdateId          int64         `json:"update_id"`
+	Message           Message       `json:"message"`
+	EditedMessage     Message       `json:"edited_message"`
+	ChannelPost       Message       `json:"channel_post"`
+	EditedChannelPost Message       `json:"edited_channel_post"`
+	CallbackQuery     CallbackQuery `json:"callback_query"`
 }
 
 type MessageEntity struct {
@@ -198,7 +209,7 @@ type InlineKeyboardButton struct {
 }
 
 type InlineKeyboardMarkup struct {
-	InlineKeyboard [][]InlineKeyboardButton
+	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
 }
 
 type replyMarkup interface {
@@ -358,11 +369,13 @@ type СonsolidatedReportFBO struct {
 }
 
 func main() {
-	var err error
-	clientMongo, err = mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
-	if err != nil {
-		panic(err)
+	mongodbUry := os.Getenv("MONGODB_URY")
+
+	if mongodbUry == "" {
+		mongodbUry = "mongodb://localhost:27017"
+		log.Printf("Defaulting to ury %s", mongodbUry)
 	}
+	clientMongo = connectMongoDB(mongodbUry)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -375,10 +388,17 @@ func main() {
 	router.HandleFunc("/", indexHandler)
 	http.Handle("/", router)
 
-	//go test()
 	log.Printf("Listening on port %s", port)
 	log.Printf("Open http://localhost:%s in the browser", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+}
+
+func connectMongoDB(applyUrI string) *mongo.Client {
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(applyUrI))
+	if err != nil {
+		panic(err)
+	}
+	return client
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -411,8 +431,10 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 	}
 	if mes.Text == "/start" {
 		coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
-		result, er := coll.InsertOne(context.TODO(), mes.From)
-		log.Println(er)
+		result, err := coll.InsertOne(context.TODO(), mes.From)
+		if err != nil {
+			log.Fatalln(err)
+		}
 		fmt.Println(result)
 	}
 	if mes.Text == "/gettodayfbo" {
@@ -438,7 +460,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 		mess += fmt.Sprintf("    <b>Итого сумма без коммисии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
 		mes.sendMessage(mess)
 	}
-	log.Printf("Рассылка сообщения %v", m.Message)
+	log.Printf("Рассылка сообщения %v", m)
 	_, err := fmt.Fprint(w, "Hello, World!11111")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -471,10 +493,16 @@ func (m *Message) deleteMessage() bool {
 
 func (m *Message) sendMessage(text string) bool {
 	client := &http.Client{}
+	matrix := make([][]InlineKeyboardButton, 1)
+	for i := range matrix {
+		matrix[i] = make([]InlineKeyboardButton, 1)
+	}
+	matrix[0][0] = InlineKeyboardButton{Text: "Тест кнопки", CallbackData: "тест"}
 	requestBody, err := json.Marshal(SendMessageRequestBody[InlineKeyboardMarkup, int64]{
-		ChatId:    (*m).Chat.Id,
-		Text:      text,
-		ParseMode: "HTML",
+		ChatId:      (*m).Chat.Id,
+		Text:        text,
+		ParseMode:   "HTML",
+		ReplyMarkup: InlineKeyboardMarkup{InlineKeyboard: matrix},
 	})
 	if err != nil {
 		log.Fatalln(err)
@@ -554,6 +582,6 @@ func countFBO(status string) СonsolidatedReportFBO {
 		}
 	}
 	crfbo.products = bb
-	crfbo.SumWithoutCommission = decimal.NewFromFloat(crfbo.SumCount.InexactFloat64() - (0.26 * crfbo.SumCount.InexactFloat64()))
+	crfbo.SumWithoutCommission = decimal.NewFromFloat(crfbo.SumCount.InexactFloat64() - (0.27 * crfbo.SumCount.InexactFloat64()))
 	return crfbo
 }
