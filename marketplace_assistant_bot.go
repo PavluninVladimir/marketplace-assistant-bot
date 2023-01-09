@@ -7,15 +7,25 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/shopspring/decimal"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
+)
+
+var (
+	clientMongo      *mongo.Client
+	urlOzon          string
+	urlTelegramBot   string
+	tokenTelegramBot string
 )
 
 type User struct {
@@ -134,27 +144,28 @@ type Chat struct {
 }
 
 type Message struct {
-	MessageId            int64    `json:"message_id"`
-	MessageThreadId      int64    `json:"message_thread_id"`
-	From                 User     `json:"from" bson:"from"`
-	SenderChat           Chat     `json:"sender_chat"`
-	Date                 int64    `json:"date"`
-	Chat                 Chat     `json:"chat"`
-	ForwardFrom          User     `json:"forward_from"`
-	ForwardFromChat      Chat     `json:"forward_from_chat"`
-	ForwardFromMessageId int64    `json:"forward_from_message_id"`
-	ForwardSignature     string   `json:"forward_signature"`
-	ForwardSenderName    string   `json:"forward_sender_name"`
-	ForwardDate          int64    `json:"forward_date"`
-	IsTopicMessage       bool     `json:"is_topic_message"`
-	IsAutomaticForward   bool     `json:"is_automatic_forward"`
-	ReplyToMessage       *Message `json:"reply_to_message"`
-	ViaBot               User     `json:"via_bot"`
-	EditDate             int64    `json:"edit_date"`
-	Sticker              Sticker  `json:"sticker"`
-	Text                 string   `json:"text"`
-	NewChatMembers       []User   `json:"new_chat_members"`
-	LeftChatMember       User     `json:"left_chat_member"`
+	MessageId            int64           `json:"message_id"`
+	MessageThreadId      int64           `json:"message_thread_id"`
+	From                 User            `json:"from" bson:"from"`
+	SenderChat           Chat            `json:"sender_chat"`
+	Date                 int64           `json:"date"`
+	Chat                 Chat            `json:"chat"`
+	ForwardFrom          User            `json:"forward_from"`
+	ForwardFromChat      Chat            `json:"forward_from_chat"`
+	ForwardFromMessageId int64           `json:"forward_from_message_id"`
+	ForwardSignature     string          `json:"forward_signature"`
+	ForwardSenderName    string          `json:"forward_sender_name"`
+	ForwardDate          int64           `json:"forward_date"`
+	IsTopicMessage       bool            `json:"is_topic_message"`
+	IsAutomaticForward   bool            `json:"is_automatic_forward"`
+	ReplyToMessage       *Message        `json:"reply_to_message"`
+	ViaBot               User            `json:"via_bot"`
+	EditDate             int64           `json:"edit_date"`
+	Sticker              Sticker         `json:"sticker"`
+	Text                 string          `json:"text"`
+	Entities             []MessageEntity `json:"entities"`
+	NewChatMembers       []User          `json:"new_chat_members"`
+	LeftChatMember       User            `json:"left_chat_member"`
 }
 
 type CallbackQuery struct {
@@ -187,7 +198,7 @@ type MessageEntity struct {
 }
 
 type WebAppInfo struct {
-	Url string `json:"url"`
+	Url string `json:"url,omitempty"`
 }
 
 type LoginUrl struct {
@@ -196,7 +207,6 @@ type LoginUrl struct {
 	BotUsername        string `json:"bot_username"`
 	RequestWriteAccess bool   `json:"request_write_access"`
 }
-
 type InlineKeyboardButton struct {
 	Text                         string     `json:"text"`
 	Url                          string     `json:"url"`
@@ -207,35 +217,67 @@ type InlineKeyboardButton struct {
 	SwitchInlineQueryCurrentChat string     `json:"switch_inline_query_current_chat"`
 	Pay                          bool       `json:"pay"`
 }
-
+type KeyboardButtonPollType struct {
+	Type string `json:"type,omitempty"`
+}
+type KeyboardButton struct {
+	Text            string                  `json:"text"`
+	RequestContact  bool                    `json:"request_contact,omitempty"`
+	RequestLocation bool                    `json:"request_location,omitempty"`
+	RequestPoll     *KeyboardButtonPollType `json:"request_poll,omitempty"`
+	WebApp          *WebAppInfo             `json:"web_app,omitempty"`
+}
 type InlineKeyboardMarkup struct {
-	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
+	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard,omitempty"`
 }
-
+type ReplyKeyboardMarkup struct {
+	Keyboard              [][]KeyboardButton `json:"keyboard"`
+	IsPersistent          bool               `json:"is_persistent"`
+	ResizeKeyboard        bool               `json:"resize_keyboard"`
+	OneTimeKeyboard       bool               `json:"one_time_keyboard"`
+	InputFieldPlaceholder string             `json:"input_field_placeholder"`
+	Selective             bool               `json:"selective"`
+}
 type replyMarkup interface {
-	InlineKeyboardMarkup
+	InlineKeyboardMarkup | ReplyKeyboardMarkup
 }
-
 type chatId interface {
 	int64 | int | string
 }
-
 type SendMessageRequestBody[T replyMarkup, Q chatId] struct {
-	ChatId                   Q      `json:"chat_id"`
-	MessageThreadId          int64  `json:"message_thread_id"`
-	Text                     string `json:"text"`
-	ParseMode                string `json:"parse_mode"`
-	Entities                 []MessageEntity
-	DisableWebPagePreview    bool  `json:"disable_web_page_preview"`
-	DisableNotification      bool  `json:"disable_notification"`
-	ProtectContent           bool  `json:"protect_content"`
-	ReplyToMessageId         int64 `json:"reply_to_message_id"`
-	AllowSendingWithoutReply bool  `json:"allow_sending_without_reply"`
-	ReplyMarkup              T     `json:"reply_markup"`
+	ChatId                   Q               `json:"chat_id"`
+	MessageThreadId          int64           `json:"message_thread_id"`
+	Text                     string          `json:"text"`
+	ParseMode                string          `json:"parse_mode"`
+	Entities                 []MessageEntity `json:"entities"`
+	DisableWebPagePreview    bool            `json:"disable_web_page_preview"`
+	DisableNotification      bool            `json:"disable_notification"`
+	ProtectContent           bool            `json:"protect_content"`
+	ReplyToMessageId         int64           `json:"reply_to_message_id"`
+	AllowSendingWithoutReply bool            `json:"allow_sending_without_reply"`
+	ReplyMarkup              T               `json:"reply_markup,omitempty"`
 }
-
-var urlListFBO = "https://api-seller.ozon.ru/v2/posting/fbo/list"
-
+type EditMessageTextRequestBody struct {
+	ChatId                int64                `json:"chat_id"`
+	MessageId             int64                `json:"message_id"`
+	InlineMessageId       string               `json:"inline_message_id"`
+	Text                  string               `json:"text"`
+	ParseMode             string               `json:"parse_mode"`
+	Entities              MessageEntity        `json:"entities"`
+	DisableWebPagePreview bool                 `json:"disable_web_page_preview"`
+	ReplyMarkup           InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+type EditMessageReplyMarkupRequestBody struct {
+	ChatId          int64                `json:"chat_id"`
+	MessageId       int64                `json:"message_id"`
+	InlineMessageId string               `json:"inline_message_id"`
+	ReplyMarkup     InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+type AnswerCallbackQueryRequestBody struct {
+	CallbackQueryId string `json:"callback_query_id"`
+	Text            string `json:"text"`
+	ShowAlert       bool   `json:"show_alert"`
+}
 type FilterFbo struct {
 	Since  string `json:"since"`
 	Status string `json:"status"`
@@ -253,7 +295,6 @@ type ListBodyRequestFBO struct {
 	Translit bool      `json:"translit"`
 	With     WithFbo   `json:"with"`
 }
-
 type ListRequestFBO struct {
 	Body ListBodyRequestFBO
 }
@@ -331,6 +372,23 @@ type ListResponseFBO struct {
 		AdditionalData []interface{} `json:"additional_data"`
 	} `json:"result"`
 }
+type OzonSetting struct {
+	ClientId string `bson:"client_id"`
+	Token    string `bson:"token"`
+}
+type Settings struct {
+	OzonSetting OzonSetting `bson:"ozon_setting"`
+}
+type TelegramUser struct {
+	NameBot  string   `bson:"name_bot"`
+	User     User     `bson:"user"`
+	Chats    []Chat   `bson:"chats"`
+	Settings Settings `bson:"settings"`
+}
+type UserDB struct {
+	Id           primitive.ObjectID `bson:"_id"`
+	TelegramUser TelegramUser       `bson:"telegram_user"`
+}
 
 type Status int
 
@@ -357,7 +415,22 @@ func (s Status) String() string {
 		"sent_by_seller"}[s]
 }
 
-var clientMongo *mongo.Client
+type CommandBot int
+
+const (
+	// SetClientIdOzonSetting Команда сохранения ClientId Ozon в параметры клиента
+	SetClientIdOzonSetting CommandBot = iota
+	GenReportToday
+	GenReportYesterday
+)
+
+func (c CommandBot) String() string {
+	return [...]string{
+		"setclientidozonsetting",
+		"Сформировать отчет за сегодня",
+		"Сформировать отчет за вчера",
+	}[c]
+}
 
 type СonsolidatedReportFBO struct {
 	TotalCount           int
@@ -368,9 +441,68 @@ type СonsolidatedReportFBO struct {
 	CancelledProducts    map[string]int
 }
 
-func main() {
-	mongodbUry := os.Getenv("MONGODB_URY")
+type SendMessageBot interface {
+	sendMessage(body interface{}) bool
+}
 
+type AnswerCallbackQueryBot interface {
+	answerCallbackQuery(body interface{}) bool
+}
+
+type EditMessageTextBot interface {
+	editMessageText(body interface{}) bool
+}
+
+type DeleteMessageBot interface {
+	deleteMessage()
+}
+
+func SendMessageToBot(bot SendMessageBot, body interface{}) {
+	bot.sendMessage(body)
+}
+
+// answerCallbackQueryToBot Реакция на нажатие кнопки под сообщение
+func answerCallbackQueryToBot(bot AnswerCallbackQueryBot, body interface{}) {
+	bot.answerCallbackQuery(body)
+}
+
+func deleteMessageToBot(bot DeleteMessageBot) {
+	bot.deleteMessage()
+}
+
+func editMessageTextToBot(bot EditMessageTextBot, body interface{}) {
+	bot.editMessageText(body)
+}
+
+type TelegramBot struct{}
+
+type DataCash struct {
+	LastCommand string
+}
+
+var Cash map[int64]DataCash
+
+func main() {
+	Cash = make(map[int64]DataCash)
+	//TelegramBot =
+	urlOzon = os.Getenv("URL_OZON")
+	if urlOzon == "" {
+		urlOzon = "https://api-seller.ozon.ru"
+		log.Printf("Defaulting to ury %s", urlOzon)
+	}
+
+	urlTelegramBot = os.Getenv("URL_TELEGRAM_BOT")
+	if urlTelegramBot == "" {
+		urlTelegramBot = "https://api.telegram.org/bot"
+		log.Printf("Defaulting to ury %s", urlTelegramBot)
+	}
+
+	tokenTelegramBot = os.Getenv("TOKEN_TELEGRAM_BOT")
+	if tokenTelegramBot == "" {
+		log.Panic("Token telegram бота не обнаружен")
+	}
+
+	mongodbUry := os.Getenv("MONGODB_URY")
 	if mongodbUry == "" {
 		mongodbUry = "mongodb://localhost:27017"
 		log.Printf("Defaulting to ury %s", mongodbUry)
@@ -420,6 +552,53 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(&buf)
 	enc.Encode(&m.Message.Text)
 	mes := &m.Message
+	bot := TelegramBot{}
+	if Cash[m.Message.From.Id+m.Message.Chat.Id].LastCommand == "/setclientidozonsetting" {
+		Cash[m.Message.From.Id+m.Message.Chat.Id] = DataCash{LastCommand: ""}
+		coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
+		update := bson.D{{"$set", bson.D{{"telegram_user.settings.ozon_setting.client_id", m.Message.Text}}}}
+		filter := bson.D{{"telegram_user.user.id", mes.From.Id}}
+		opts := options.Update().SetUpsert(true)
+		_, err := coll.UpdateOne(context.TODO(), filter, update, opts)
+		if err != nil {
+			panic(err)
+		} else {
+			smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+				ChatId: m.Message.Chat.Id,
+				Text:   "ClientId успешно сохранен.",
+				ReplyMarkup: InlineKeyboardMarkup{
+					InlineKeyboard: CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
+						{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+						{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+						{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+					})},
+			}
+			SendMessageToBot(&bot, smm)
+		}
+	}
+	if Cash[m.Message.From.Id+m.Message.Chat.Id].LastCommand == "/settokenozonsetting" {
+		Cash[m.Message.From.Id+m.Message.Chat.Id] = DataCash{LastCommand: ""}
+		coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
+		update := bson.D{{"$set", bson.D{{"telegram_user.settings.ozon_setting.token", m.Message.Text}}}}
+		filter := bson.D{{"telegram_user.user.id", mes.From.Id}}
+		opts := options.Update().SetUpsert(true)
+		_, err := coll.UpdateOne(context.TODO(), filter, update, opts)
+		if err != nil {
+			panic(err)
+		} else {
+			sm := TelegramBot{}
+			smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+				ChatId: m.Message.Chat.Id,
+				Text:   "Token успешно сохранен.",
+				ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
+					{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+					{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+					{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+				})},
+			}
+			SendMessageToBot(&sm, smm)
+		}
+	}
 	if mes.LeftChatMember.Id != 0 {
 		log.Printf("Left")
 		mes.deleteMessage()
@@ -427,17 +606,141 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 	if mes.NewChatMembers != nil {
 		log.Printf("New")
 		mes.deleteMessage()
-		mes.sendMessage("Добро пожаловать @" + mes.NewChatMembers[0].Username)
+		//mes.sendMessage("Добро пожаловать @" + mes.NewChatMembers[0].Username)
 	}
 	if mes.Text == "/start" {
+		var user UserDB
 		coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
-		result, err := coll.InsertOne(context.TODO(), mes.From)
+		filter := bson.D{{"telegram_user.user.id", mes.From.Id}}
+		err := coll.FindOne(context.TODO(), filter).Decode(&user)
 		if err != nil {
-			log.Fatalln(err)
+			fmt.Println(err)
 		}
-		fmt.Println(result)
+		if user.Id.IsZero() {
+			userDB := UserDB{
+				Id: primitive.NewObjectID(),
+				TelegramUser: TelegramUser{
+					User:  m.Message.From,
+					Chats: []Chat{m.Message.Chat},
+				}}
+			_, err := coll.InsertOne(context.TODO(), userDB)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			if result := findIndex[Chat](user.TelegramUser.Chats, func(c Chat) bool {
+				if c.Id == m.Message.Chat.Id {
+					return true
+				}
+				return false
+			}); result < 0 {
+				user.TelegramUser.Chats = append(user.TelegramUser.Chats, m.Message.Chat)
+			}
+			update := bson.D{{"$set", user}}
+			opts := options.Update().SetUpsert(true)
+			ud, err := coll.UpdateByID(context.TODO(), user.Id, update, opts)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(ud)
+		}
+		sm := TelegramBot{}
+		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			ChatId: m.Message.Chat.Id,
+			Text:   "Добро пожаловать! Чтобы использовать бота необходимо его настроить",
+			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "Перейти к настройкам?", CallbackData: "/settings"}},
+			})},
+		}
+		SendMessageToBot(&sm, smm)
 	}
-	if mes.Text == "/gettodayfbo" {
+	if m.CallbackQuery.Data == "/settings" {
+		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		sm := TelegramBot{}
+		smm := EditMessageTextRequestBody{
+			ChatId:    m.CallbackQuery.Message.Chat.Id,
+			MessageId: m.CallbackQuery.Message.MessageId,
+			Text:      "Выберите, пожалуйста маркетплейс который вы бы хотели настроить.",
+			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "OZON", CallbackData: "/ozonsetting"}},
+				{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+			})},
+		}
+		editMessageTextToBot(&sm, smm)
+	}
+	if m.CallbackQuery.Data == "/ozonsetting" {
+		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		sm := TelegramBot{}
+		smm := EditMessageTextRequestBody{
+			ChatId:    m.CallbackQuery.Message.Chat.Id,
+			MessageId: m.CallbackQuery.Message.MessageId,
+			Text:      "Для получения данных из OZON seller необходимо указать ClientId и Token. Их можно получить в личном кабинете продавца.",
+			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+				{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+				{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Проверка подключения к Ozon Seller", CallbackData: "/testconnectozonseller"}},
+				{Row: 3, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+			})},
+		}
+		editMessageTextToBot(&sm, smm)
+	}
+	if m.CallbackQuery.Data == "/settokenozonsetting" {
+		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		Cash[m.CallbackQuery.From.Id+m.CallbackQuery.Message.Chat.Id] = DataCash{LastCommand: "/settokenozonsetting"}
+		sm := TelegramBot{}
+		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			ChatId: m.CallbackQuery.Message.Chat.Id,
+			Text:   "ОК. Пришлите, пожалуйста Token для бота.",
+		}
+		SendMessageToBot(&sm, smm)
+	}
+	if m.CallbackQuery.Data == "/setclientidozonsetting" {
+		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		Cash[m.CallbackQuery.From.Id+m.CallbackQuery.Message.Chat.Id] = DataCash{LastCommand: "/setclientidozonsetting"}
+		sm := TelegramBot{}
+		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			ChatId: m.CallbackQuery.Message.Chat.Id,
+			Text:   "ОК. Пришлите, пожалуйста ClientID для бота.",
+		}
+		SendMessageToBot(&sm, smm)
+	}
+	if m.CallbackQuery.Data == "/backsettings" {
+		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		sm := TelegramBot{}
+		smm := EditMessageTextRequestBody{
+			ChatId:    m.CallbackQuery.Message.Chat.Id,
+			MessageId: m.CallbackQuery.Message.MessageId,
+			Text:      "Настроить бота?",
+			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "Да", CallbackData: "/settings"}},
+			})},
+		}
+		editMessageTextToBot(&sm, smm)
+	}
+	if m.CallbackQuery.Data == "/testconnectozonseller" {
+		var user UserDB
+		coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
+		filter := bson.D{{"telegram_user.user.id", m.CallbackQuery.From.Id}}
+		err := coll.FindOne(context.TODO(), filter).Decode(&user)
+		if err != nil {
+			panic(err)
+		}
+		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{
+			CallbackQueryId: m.CallbackQuery.Id,
+			Text:            checkAuthOzonSeller(user.TelegramUser.Settings.OzonSetting.ClientId, user.TelegramUser.Settings.OzonSetting.Token),
+			ShowAlert:       false,
+		})
+		SendMessageToBot(&bot, SendMessageRequestBody[ReplyKeyboardMarkup, int64]{
+			ChatId: m.CallbackQuery.Message.Chat.Id,
+			Text:   "sdfsf",
+			ReplyMarkup: ReplyKeyboardMarkup{Keyboard: CreateButtonsBot[KeyboardButton]([]ButtonBot[KeyboardButton]{
+				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportToday.String()}},
+				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportYesterday.String()}},
+			}),
+				ResizeKeyboard: true},
+		})
+	}
+	if mes.Text == GenReportToday.String() {
 		count := countFBO("")
 		mess := "<b>Статистика продаж за день OZON FBO:</b>\n\n"
 		mess += fmt.Sprintf("    <b>Количество заказов: %d</b> \n", count.TotalCount-count.CancelledTotalCount)
@@ -458,13 +761,86 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 		mess += fmt.Sprintf("    <b>Итого количество: %d</b>\n", count.TotalCount)
 		mess += fmt.Sprintf("    <b>Итого сумма: %s</b>\n", count.SumCount.StringFixed(2))
 		mess += fmt.Sprintf("    <b>Итого сумма без коммисии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
-		mes.sendMessage(mess)
+		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			ChatId:    mes.Chat.Id,
+			ParseMode: "HTML",
+			Text:      mess,
+		})
+	}
+	if mes.Text == GenReportYesterday.String() {
+		count := countYesterdayFBO("")
+		mess := "<b>Статистика продаж за день OZON FBO:</b>\n\n"
+		mess += fmt.Sprintf("    <b>Количество заказов: %d</b> \n", count.TotalCount-count.CancelledTotalCount)
+		mess += "\n"
+		for value, key := range count.products {
+			mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
+		}
+		mess += "\n"
+		if count.CancelledTotalCount > 0 {
+			mess += fmt.Sprintf("    <b>Количество отмененных заказов: %d</b>\n", count.CancelledTotalCount)
+			mess += "\n"
+			for value, key := range count.CancelledProducts {
+				mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
+			}
+			mess += "\n"
+		}
+		mess += "------------------------------------------\n"
+		mess += fmt.Sprintf("    <b>Итого количество: %d</b>\n", count.TotalCount)
+		mess += fmt.Sprintf("    <b>Итого сумма: %s</b>\n", count.SumCount.StringFixed(2))
+		mess += fmt.Sprintf("    <b>Итого сумма без коммисии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
+		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			ChatId:    mes.Chat.Id,
+			ParseMode: "HTML",
+			Text:      mess,
+		})
 	}
 	log.Printf("Рассылка сообщения %v", m)
 	_, err := fmt.Fprint(w, "Hello, World!11111")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+type buttonTelegrmBot interface {
+	InlineKeyboardButton | KeyboardButton
+}
+type ButtonBot[T buttonTelegrmBot] struct {
+	Row    int
+	Col    int
+	Button T
+}
+
+func CreateButtonsBot[Q buttonTelegrmBot](b []ButtonBot[Q]) [][]Q {
+	sort.Slice(b, func(i, j int) bool {
+		return b[i].Row < b[j].Row
+	})
+	temp := make(map[int][]Q)
+	var keys []int
+	for _, iteam := range b {
+		if temp[iteam.Row] == nil {
+			keys = append(keys, iteam.Row)
+		}
+		temp[iteam.Row] = append(temp[iteam.Row], iteam.Button)
+
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+	matrix := make([][]Q, len(temp))
+
+	i := 0
+	for index, value := range keys {
+		matrix[index] = temp[value]
+		i++
+	}
+
+	for i := range matrix {
+		if matrix[i] != nil {
+			matrix[i] = matrix[i]
+		}
+	}
+
+	return matrix
 }
 
 func (m *Message) deleteMessage() bool {
@@ -478,7 +854,7 @@ func (m *Message) deleteMessage() bool {
 		return false
 	}
 	req, err := http.NewRequest(
-		"POST", "https://api.telegram.org/bot5851892989:AAE5Q4QFNipbx67qGumr7pcjAUfMWWQDUNQ/deleteMessage",
+		"POST", urlTelegramBot+tokenTelegramBot+"/deleteMessage",
 		bytes.NewBuffer(requestBody),
 	)
 	req.Header.Set("content-type", "application/json")
@@ -491,25 +867,19 @@ func (m *Message) deleteMessage() bool {
 	return true
 }
 
-func (m *Message) sendMessage(text string) bool {
+func (t *TelegramBot) editMessageText(body interface{}) bool {
 	client := &http.Client{}
-	matrix := make([][]InlineKeyboardButton, 1)
-	for i := range matrix {
-		matrix[i] = make([]InlineKeyboardButton, 1)
+	command := "editMessageText"
+	if _, ok := body.(EditMessageReplyMarkupRequestBody); ok {
+		command = "editMessageReplyMarkup"
 	}
-	matrix[0][0] = InlineKeyboardButton{Text: "Тест кнопки", CallbackData: "тест"}
-	requestBody, err := json.Marshal(SendMessageRequestBody[InlineKeyboardMarkup, int64]{
-		ChatId:      (*m).Chat.Id,
-		Text:        text,
-		ParseMode:   "HTML",
-		ReplyMarkup: InlineKeyboardMarkup{InlineKeyboard: matrix},
-	})
+	requestBody, err := json.Marshal(&body)
 	if err != nil {
 		log.Fatalln(err)
 		return false
 	}
 	req, err := http.NewRequest(
-		"POST", "https://api.telegram.org/bot5851892989:AAE5Q4QFNipbx67qGumr7pcjAUfMWWQDUNQ/sendMessage",
+		"POST", urlTelegramBot+tokenTelegramBot+"/"+command,
 		bytes.NewBuffer(requestBody),
 	)
 	req.Header.Set("content-type", "application/json")
@@ -522,7 +892,71 @@ func (m *Message) sendMessage(text string) bool {
 	return true
 }
 
+func (t *TelegramBot) sendMessage(body interface{}) bool {
+	client := &http.Client{}
+	requestBody, err := json.Marshal(&body)
+	if err != nil {
+		log.Fatalln(err)
+		return false
+	}
+	req, err := http.NewRequest(
+		"POST", urlTelegramBot+tokenTelegramBot+"/sendMessage",
+		bytes.NewBuffer(requestBody),
+	)
+	req.Header.Set("content-type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer resp.Body.Close()
+	return true
+}
+
+func (t *TelegramBot) answerCallbackQuery(body interface{}) bool {
+	client := &http.Client{}
+	requestBody, err := json.Marshal(&body)
+	if err != nil {
+		log.Fatalln(err)
+		return false
+	}
+	req, err := http.NewRequest(
+		"POST", urlTelegramBot+tokenTelegramBot+"/answerCallbackQuery",
+		bytes.NewBuffer(requestBody),
+	)
+	req.Header.Set("content-type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer resp.Body.Close()
+	return true
+}
+
+func checkAuthOzonSeller(clientId string, token string) string {
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", urlOzon+"/v1/actions", nil)
+
+	req.Header.Set("Client-Id", clientId)
+	req.Header.Set("Api-Key", token)
+	req.Header.Set("content-type", "application/json")
+
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+	return resp.Status
+}
+
 func countFBO(status string) СonsolidatedReportFBO {
+	var os UserDB
+	//sss, _ := primitive.ObjectIDFromHex("198710657")
+	coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
+	opts := options.FindOne().SetProjection(bson.D{{"telegram_user.settings.ozon_setting", 1}, {"_id", 0}})
+	filter := bson.D{{"telegram_user.user.id", 198710657}}
+	err1 := coll.FindOne(context.TODO(), filter, opts).Decode(&os)
+	if err1 != nil {
+		panic(err1)
+	}
 	var body ListResponseFBO
 	cancelled := Cancelled
 	crfbo := СonsolidatedReportFBO{}
@@ -545,12 +979,12 @@ func countFBO(status string) СonsolidatedReportFBO {
 		return crfbo
 	}
 	req, err := http.NewRequest(
-		"POST", "https://api-seller.ozon.ru/v2/posting/fbo/list",
+		"POST", urlOzon+"/v2/posting/fbo/list",
 		bytes.NewBuffer(requestBody),
 	)
 
-	req.Header.Set("Client-Id", "391200")
-	req.Header.Set("Api-Key", "b04db513-226a-4b36-8fa4-edc54d253566")
+	req.Header.Set("Client-Id", os.TelegramUser.Settings.OzonSetting.ClientId)
+	req.Header.Set("Api-Key", os.TelegramUser.Settings.OzonSetting.Token)
 	req.Header.Set("content-type", "application/json")
 
 	resp, err := client.Do(req)
@@ -584,4 +1018,86 @@ func countFBO(status string) СonsolidatedReportFBO {
 	crfbo.products = bb
 	crfbo.SumWithoutCommission = decimal.NewFromFloat(crfbo.SumCount.InexactFloat64() - (0.27 * crfbo.SumCount.InexactFloat64()))
 	return crfbo
+}
+
+func countYesterdayFBO(status string) СonsolidatedReportFBO {
+	var os UserDB
+	//sss, _ := primitive.ObjectIDFromHex("198710657")
+	coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
+	opts := options.FindOne().SetProjection(bson.D{{"telegram_user.settings.ozon_setting", 1}, {"_id", 0}})
+	filter := bson.D{{"telegram_user.user.id", 198710657}}
+	err1 := coll.FindOne(context.TODO(), filter, opts).Decode(&os)
+	if err1 != nil {
+		panic(err1)
+	}
+	var body ListResponseFBO
+	cancelled := Cancelled
+	crfbo := СonsolidatedReportFBO{}
+	crfbo.CancelledProducts = make(map[string]int)
+	tt := time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(-(24 * time.Hour))
+	client := &http.Client{}
+	requestBody, err := json.Marshal(ListBodyRequestFBO{
+		Dir: "ASC",
+		Filter: FilterFbo{
+			Since:  tt.Format("2006-01-02T15:04:05Z"),
+			Status: status,
+			To:     tt.Add(24 * time.Hour).Format("2006-01-02T15:04:05Z"),
+		},
+		Limit:  100,
+		Offset: 0,
+	})
+	if err != nil {
+		log.Fatalln(err)
+		return crfbo
+	}
+	req, err := http.NewRequest(
+		"POST", urlOzon+"/v2/posting/fbo/list",
+		bytes.NewBuffer(requestBody),
+	)
+
+	req.Header.Set("Client-Id", os.TelegramUser.Settings.OzonSetting.ClientId)
+	req.Header.Set("Api-Key", os.TelegramUser.Settings.OzonSetting.Token)
+	req.Header.Set("content-type", "application/json")
+
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
+	if err != nil {
+		fmt.Println(err)
+		return crfbo
+	}
+	b, err := io.ReadAll(resp.Body)
+	err = json.Unmarshal(b, &body)
+	if err != nil {
+		fmt.Println(err)
+		return crfbo
+	}
+	var bb = make(map[string]int)
+	replacer := strings.NewReplacer("Получешки Colibri ", "", "Полупальцы Colibri ", "")
+	for _, aa := range body.Result {
+		for _, product := range aa.Products {
+			crfbo.TotalCount += product.Quantity
+			if aa.Status != cancelled.String() {
+				if price, err := strconv.ParseFloat(product.Price, 32); err == nil {
+					crfbo.SumCount = decimal.Sum(crfbo.SumCount, decimal.NewFromFloat(price))
+				}
+				bb[replacer.Replace(product.Name)] += product.Quantity
+			} else {
+				crfbo.CancelledTotalCount += product.Quantity
+				crfbo.CancelledProducts[replacer.Replace(product.Name)] += product.Quantity
+			}
+		}
+	}
+	crfbo.products = bb
+	crfbo.SumWithoutCommission = decimal.NewFromFloat(crfbo.SumCount.InexactFloat64() - (0.27 * crfbo.SumCount.InexactFloat64()))
+	return crfbo
+}
+
+func findIndex[T any](obj []T, f func(e T) (result bool)) int {
+	result := -1
+	for i, entity := range obj {
+		if f(entity) {
+			return i
+		}
+	}
+	return result
 }
