@@ -599,15 +599,6 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			SendMessageToBot(&sm, smm)
 		}
 	}
-	if mes.LeftChatMember.Id != 0 {
-		log.Printf("Left")
-		mes.deleteMessage()
-	}
-	if mes.NewChatMembers != nil {
-		log.Printf("New")
-		mes.deleteMessage()
-		//mes.sendMessage("Добро пожаловать @" + mes.NewChatMembers[0].Username)
-	}
 	if mes.Text == "/start" {
 		var user UserDB
 		coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
@@ -734,7 +725,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			Text:   "sdfsf",
 			ReplyMarkup: ReplyKeyboardMarkup{Keyboard: CreateButtonsBot[KeyboardButton]([]ButtonBot[KeyboardButton]{
 				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportToday.String()}},
-				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportYesterday.String()}},
+				{Row: 2, Col: 1, Button: KeyboardButton{Text: GenReportYesterday.String()}},
 			}),
 				ResizeKeyboard: true},
 		})
@@ -759,7 +750,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 		mess += "------------------------------------------\n"
 		mess += fmt.Sprintf("    <b>Итого количество: %d</b>\n", count.TotalCount)
 		mess += fmt.Sprintf("    <b>Итого сумма: %s</b>\n", count.SumCount.StringFixed(2))
-		mess += fmt.Sprintf("    <b>Итого сумма без коммисии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
+		mess += fmt.Sprintf("    <b>Итого сумма без комиссии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
 		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
 			ParseMode: "HTML",
@@ -786,7 +777,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 		mess += "------------------------------------------\n"
 		mess += fmt.Sprintf("    <b>Итого количество: %d</b>\n", count.TotalCount)
 		mess += fmt.Sprintf("    <b>Итого сумма: %s</b>\n", count.SumCount.StringFixed(2))
-		mess += fmt.Sprintf("    <b>Итого сумма без коммисии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
+		mess += fmt.Sprintf("    <b>Итого сумма без комиссии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
 		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
 			ParseMode: "HTML",
@@ -932,7 +923,6 @@ func (t *TelegramBot) answerCallbackQuery(body interface{}) bool {
 	defer resp.Body.Close()
 	return true
 }
-
 func checkAuthOzonSeller(clientId string, token string) string {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", urlOzon+"/v1/actions", nil)
@@ -945,7 +935,6 @@ func checkAuthOzonSeller(clientId string, token string) string {
 	defer resp.Body.Close()
 	return resp.Status
 }
-
 func countFBO(status string) СonsolidatedReportFBO {
 	var os UserDB
 	//sss, _ := primitive.ObjectIDFromHex("198710657")
@@ -1018,7 +1007,6 @@ func countFBO(status string) СonsolidatedReportFBO {
 	crfbo.SumWithoutCommission = decimal.NewFromFloat(crfbo.SumCount.InexactFloat64() - (0.27 * crfbo.SumCount.InexactFloat64()))
 	return crfbo
 }
-
 func countYesterdayFBO(status string) СonsolidatedReportFBO {
 	var os UserDB
 	//sss, _ := primitive.ObjectIDFromHex("198710657")
