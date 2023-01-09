@@ -656,7 +656,6 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 	}
 	if m.CallbackQuery.Data == "/settings" {
 		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
-		sm := TelegramBot{}
 		smm := EditMessageTextRequestBody{
 			ChatId:    m.CallbackQuery.Message.Chat.Id,
 			MessageId: m.CallbackQuery.Message.MessageId,
@@ -666,7 +665,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 				{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 			})},
 		}
-		editMessageTextToBot(&sm, smm)
+		editMessageTextToBot(&bot, smm)
 	}
 	if m.CallbackQuery.Data == "/ozonsetting" {
 		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
