@@ -278,6 +278,7 @@ type AnswerCallbackQueryRequestBody struct {
 	Text            string `json:"text"`
 	ShowAlert       bool   `json:"show_alert"`
 }
+
 type FilterFbo struct {
 	Since  string `json:"since"`
 	Status string `json:"status"`
@@ -372,10 +373,12 @@ type ListResponseFBO struct {
 		AdditionalData []interface{} `json:"additional_data"`
 	} `json:"result"`
 }
+
 type OzonSetting struct {
 	ClientId string `bson:"client_id"`
 	Token    string `bson:"token"`
 }
+
 type Settings struct {
 	OzonSetting OzonSetting `bson:"ozon_setting"`
 }
@@ -475,6 +478,19 @@ func editMessageTextToBot(bot EditMessageTextBot, body interface{}) {
 }
 
 type TelegramBot struct{}
+
+type ReportMarketplace interface {
+	orderSummaryReport(userId int64, filter FilterFbo) СonsolidatedReportFBO
+}
+
+type UserRepository interface {
+	getOzonSetting(id int64) (*OzonSetting, error)
+}
+type Marketplace interface {
+	ReportMarketplace
+}
+
+type OzonMarketplace struct{}
 
 type DataCash struct {
 	LastCommand string
@@ -731,57 +747,30 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	if mes.Text == GenReportToday.String() {
-		count := countFBO("")
-		mess := "<b>Статистика продаж за день OZON FBO:</b>\n\n"
-		mess += fmt.Sprintf("    <b>Количество заказов: %d</b> \n", count.TotalCount-count.CancelledTotalCount)
-		mess += "\n"
-		for value, key := range count.products {
-			mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
+		var marketplace Marketplace = &OzonMarketplace{}
+		filter := FilterFbo{
+			Since:  time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Format(time.RFC3339),
+			Status: "",
+			To:     time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Format(time.RFC3339),
 		}
-		mess += "\n"
-		if count.CancelledTotalCount > 0 {
-			mess += fmt.Sprintf("    <b>Количество отмененных заказов: %d</b>\n", count.CancelledTotalCount)
-			mess += "\n"
-			for value, key := range count.CancelledProducts {
-				mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
-			}
-			mess += "\n"
-		}
-		mess += "------------------------------------------\n"
-		mess += fmt.Sprintf("    <b>Итого количество: %d</b>\n", count.TotalCount)
-		mess += fmt.Sprintf("    <b>Итого сумма: %s</b>\n", count.SumCount.StringFixed(2))
-		mess += fmt.Sprintf("    <b>Итого сумма без комиссии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
+
 		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
-			ParseMode: "HTML",
-			Text:      mess,
+			ParseMode: "HTML", //TODO приминить паттерн стратегия
+			Text:      printOrderSummaryReport(marketplace.orderSummaryReport(m.Message.From.Id, filter)),
 		})
 	}
 	if mes.Text == GenReportYesterday.String() {
-		count := countYesterdayFBO("")
-		mess := "<b>Статистика продаж за день OZON FBO:</b>\n\n"
-		mess += fmt.Sprintf("    <b>Количество заказов: %d</b> \n", count.TotalCount-count.CancelledTotalCount)
-		mess += "\n"
-		for value, key := range count.products {
-			mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
+		var marketplace Marketplace = &OzonMarketplace{}
+		filter := FilterFbo{
+			Since:  time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(-(24 * time.Hour)).Format(time.RFC3339),
+			Status: "",
+			To:     time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Add(-(24 * time.Hour)).Format(time.RFC3339),
 		}
-		mess += "\n"
-		if count.CancelledTotalCount > 0 {
-			mess += fmt.Sprintf("    <b>Количество отмененных заказов: %d</b>\n", count.CancelledTotalCount)
-			mess += "\n"
-			for value, key := range count.CancelledProducts {
-				mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
-			}
-			mess += "\n"
-		}
-		mess += "------------------------------------------\n"
-		mess += fmt.Sprintf("    <b>Итого количество: %d</b>\n", count.TotalCount)
-		mess += fmt.Sprintf("    <b>Итого сумма: %s</b>\n", count.SumCount.StringFixed(2))
-		mess += fmt.Sprintf("    <b>Итого сумма без комиссии OZON: %s</b>\n", count.SumWithoutCommission.StringFixed(2))
 		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
-			ParseMode: "HTML",
-			Text:      mess,
+			ParseMode: "HTML", //TODO приминить паттерн стратегия
+			Text:      printOrderSummaryReport(marketplace.orderSummaryReport(m.Message.From.Id, filter)),
 		})
 	}
 	log.Printf("Рассылка сообщения %v", m)
@@ -789,6 +778,29 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func printOrderSummaryReport(c СonsolidatedReportFBO) string {
+	mess := "<b>Статистика продаж за день OZON FBO:</b>\n\n"
+	mess += fmt.Sprintf("    <b>Количество заказов: %d</b> \n", c.TotalCount-c.CancelledTotalCount)
+	mess += "\n"
+	for value, key := range c.products {
+		mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
+	}
+	mess += "\n"
+	if c.CancelledTotalCount > 0 {
+		mess += fmt.Sprintf("    <b>Количество отмененных заказов: %d</b>\n", c.CancelledTotalCount)
+		mess += "\n"
+		for value, key := range c.CancelledProducts {
+			mess += fmt.Sprintf("        <i>%s: <b>%d</b></i> \n", value, key)
+		}
+		mess += "\n"
+	}
+	mess += "------------------------------------------\n"
+	mess += fmt.Sprintf("    <b>Итого количество: %d</b>\n", c.TotalCount)
+	mess += fmt.Sprintf("    <b>Итого сумма: %s</b>\n", c.SumCount.StringFixed(2))
+	mess += fmt.Sprintf("    <b>Итого сумма без комиссии OZON: %s</b>\n", c.SumWithoutCommission.StringFixed(2))
+	return mess
 }
 
 type buttonTelegrmBot interface {
@@ -935,135 +947,69 @@ func checkAuthOzonSeller(clientId string, token string) string {
 	defer resp.Body.Close()
 	return resp.Status
 }
-func countFBO(status string) СonsolidatedReportFBO {
-	var os UserDB
-	//sss, _ := primitive.ObjectIDFromHex("198710657")
+func (m UserDB) getOzonSetting(id int64) (*OzonSetting, error) {
 	coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
 	opts := options.FindOne().SetProjection(bson.D{{"telegram_user.settings.ozon_setting", 1}, {"_id", 0}})
-	filter := bson.D{{"telegram_user.user.id", 198710657}}
-	err1 := coll.FindOne(context.TODO(), filter, opts).Decode(&os)
-	if err1 != nil {
-		panic(err1)
-	}
-	var body ListResponseFBO
-	cancelled := Cancelled
-	crfbo := СonsolidatedReportFBO{}
-	crfbo.CancelledProducts = make(map[string]int)
-	//tt := time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(-(24 * time.Hour))
-	tt := time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour))
-	client := &http.Client{}
-	requestBody, err := json.Marshal(ListBodyRequestFBO{
-		Dir: "ASC",
-		Filter: FilterFbo{
-			Since:  tt.Format("2006-01-02T15:04:05Z"),
-			Status: status,
-			To:     tt.Add(24 * time.Hour).Format("2006-01-02T15:04:05Z"),
-		},
-		Limit:  100,
-		Offset: 0,
-	})
-	if err != nil {
-		log.Fatalln(err)
-		return crfbo
-	}
-	req, err := http.NewRequest(
-		"POST", urlOzon+"/v2/posting/fbo/list",
-		bytes.NewBuffer(requestBody),
-	)
-
-	req.Header.Set("Client-Id", os.TelegramUser.Settings.OzonSetting.ClientId)
-	req.Header.Set("Api-Key", os.TelegramUser.Settings.OzonSetting.Token)
-	req.Header.Set("content-type", "application/json")
-
-	resp, err := client.Do(req)
-	defer resp.Body.Close()
-	if err != nil {
-		fmt.Println(err)
-		return crfbo
-	}
-	b, err := io.ReadAll(resp.Body)
-	err = json.Unmarshal(b, &body)
-	if err != nil {
-		fmt.Println(err)
-		return crfbo
-	}
-	var bb = make(map[string]int)
-	replacer := strings.NewReplacer("Получешки Colibri ", "", "Полупальцы Colibri ", "")
-	for _, aa := range body.Result {
-		for _, product := range aa.Products {
-			crfbo.TotalCount += product.Quantity
-			if aa.Status != cancelled.String() {
-				if price, err := strconv.ParseFloat(product.Price, 32); err == nil {
-					crfbo.SumCount = decimal.Sum(crfbo.SumCount, decimal.NewFromFloat(price))
-				}
-				bb[replacer.Replace(product.Name)] += product.Quantity
-			} else {
-				crfbo.CancelledTotalCount += product.Quantity
-				crfbo.CancelledProducts[replacer.Replace(product.Name)] += product.Quantity
-			}
-		}
-	}
-	crfbo.products = bb
-	crfbo.SumWithoutCommission = decimal.NewFromFloat(crfbo.SumCount.InexactFloat64() - (0.27 * crfbo.SumCount.InexactFloat64()))
-	return crfbo
+	filter := bson.D{{"telegram_user.user.id", id}}
+	err := coll.FindOne(context.TODO(), filter, opts).Decode(&m)
+	return &m.TelegramUser.Settings.OzonSetting, err
 }
-func countYesterdayFBO(status string) СonsolidatedReportFBO {
-	var os UserDB
-	//sss, _ := primitive.ObjectIDFromHex("198710657")
-	coll := clientMongo.Database("MyInfantBotDB").Collection("bot_users")
-	opts := options.FindOne().SetProjection(bson.D{{"telegram_user.settings.ozon_setting", 1}, {"_id", 0}})
-	filter := bson.D{{"telegram_user.user.id", 198710657}}
-	err1 := coll.FindOne(context.TODO(), filter, opts).Decode(&os)
-	if err1 != nil {
-		panic(err1)
+
+func fboListHandler(userId int64, body ListBodyRequestFBO) (*ListResponseFBO, error) {
+	client := &http.Client{}
+	requestBody, err := json.Marshal(body)
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
 	}
-	var body ListResponseFBO
-	cancelled := Cancelled
+	r, err := http.NewRequest(
+		"POST", urlOzon+"/v2/posting/fbo/list",
+		bytes.NewBuffer(requestBody),
+	)
+	var userDb UserRepository = UserDB{}
+	setting, err := userDb.getOzonSetting(userId)
+	if err != nil {
+		panic(err)
+	}
+
+	r.Header.Set("Client-Id", setting.ClientId)
+	r.Header.Set("Api-Key", setting.Token)
+	r.Header.Set("content-type", "application/json")
+
+	response, err := client.Do(r)
+	defer response.Body.Close()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	var l ListResponseFBO
+	b, err := io.ReadAll(response.Body)
+	err = json.Unmarshal(b, &l)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &l, nil
+}
+
+func (m *OzonMarketplace) orderSummaryReport(userId int64, filter FilterFbo) СonsolidatedReportFBO {
 	crfbo := СonsolidatedReportFBO{}
 	crfbo.CancelledProducts = make(map[string]int)
-	tt := time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(-(24 * time.Hour))
-	client := &http.Client{}
-	requestBody, err := json.Marshal(ListBodyRequestFBO{
-		Dir: "ASC",
-		Filter: FilterFbo{
-			Since:  tt.Format("2006-01-02T15:04:05Z"),
-			Status: status,
-			To:     tt.Add(24 * time.Hour).Format("2006-01-02T15:04:05Z"),
-		},
+	var bb = make(map[string]int)
+	replacer := strings.NewReplacer("Получешки Colibri ", "", "Полупальцы Colibri ", "")
+	response, err := fboListHandler(userId, ListBodyRequestFBO{
+		Dir:    "ASC",
+		Filter: filter,
 		Limit:  100,
 		Offset: 0,
 	})
 	if err != nil {
-		log.Fatalln(err)
-		return crfbo
+		panic(err)
 	}
-	req, err := http.NewRequest(
-		"POST", urlOzon+"/v2/posting/fbo/list",
-		bytes.NewBuffer(requestBody),
-	)
-
-	req.Header.Set("Client-Id", os.TelegramUser.Settings.OzonSetting.ClientId)
-	req.Header.Set("Api-Key", os.TelegramUser.Settings.OzonSetting.Token)
-	req.Header.Set("content-type", "application/json")
-
-	resp, err := client.Do(req)
-	defer resp.Body.Close()
-	if err != nil {
-		fmt.Println(err)
-		return crfbo
-	}
-	b, err := io.ReadAll(resp.Body)
-	err = json.Unmarshal(b, &body)
-	if err != nil {
-		fmt.Println(err)
-		return crfbo
-	}
-	var bb = make(map[string]int)
-	replacer := strings.NewReplacer("Получешки Colibri ", "", "Полупальцы Colibri ", "")
-	for _, aa := range body.Result {
+	for _, aa := range response.Result {
 		for _, product := range aa.Products {
 			crfbo.TotalCount += product.Quantity
-			if aa.Status != cancelled.String() {
+			if aa.Status != Cancelled.String() {
 				if price, err := strconv.ParseFloat(product.Price, 32); err == nil {
 					crfbo.SumCount = decimal.Sum(crfbo.SumCount, decimal.NewFromFloat(price))
 				}
