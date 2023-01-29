@@ -257,6 +257,10 @@ type SendMessageRequestBody[T replyMarkup, Q chatId] struct {
 	AllowSendingWithoutReply bool            `json:"allow_sending_without_reply"`
 	ReplyMarkup              T               `json:"reply_markup,omitempty"`
 }
+type DeleteMessageRequestBody struct {
+	ChatId    int64 `json:"chat_id"`
+	MessageId int64 `json:"message_id"`
+}
 type EditMessageTextRequestBody struct {
 	ChatId                int64                `json:"chat_id"`
 	MessageId             int64                `json:"message_id"`
@@ -457,7 +461,7 @@ type EditMessageTextBot interface {
 }
 
 type DeleteMessageBot interface {
-	deleteMessage()
+	deleteMessage(body interface{}) bool
 }
 
 func SendMessageToBot(bot SendMessageBot, body interface{}) {
@@ -469,11 +473,11 @@ func answerCallbackQueryToBot(bot AnswerCallbackQueryBot, body interface{}) {
 	bot.answerCallbackQuery(body)
 }
 
-func deleteMessageToBot(bot DeleteMessageBot) {
-	bot.deleteMessage()
+func DeleteMessageToBot(bot DeleteMessageBot, body interface{}) {
+	bot.deleteMessage(body)
 }
 
-func editMessageTextToBot(bot EditMessageTextBot, body interface{}) {
+func EditMessageTextToBot(bot EditMessageTextBot, body interface{}) {
 	bot.editMessageText(body)
 }
 
@@ -672,7 +676,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 				{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 			})},
 		}
-		editMessageTextToBot(&bot, smm)
+		EditMessageTextToBot(&bot, smm)
 	}
 	if m.CallbackQuery.Data == "/ozonsetting" {
 		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
@@ -688,7 +692,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 				{Row: 3, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 			})},
 		}
-		editMessageTextToBot(&sm, smm)
+		EditMessageTextToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/settokenozonsetting" {
 		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
@@ -721,7 +725,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "Да", CallbackData: "/settings"}},
 			})},
 		}
-		editMessageTextToBot(&sm, smm)
+		EditMessageTextToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/testconnectozonseller" {
 		var user UserDB
@@ -767,8 +771,9 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			Status: "",
 			To:     time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Add(-(24 * time.Hour)).Format(time.RFC3339),
 		}
-		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		EditMessageTextToBot(&bot, EditMessageTextRequestBody{
 			ChatId:    mes.Chat.Id,
+			MessageId: mes.MessageId,
 			ParseMode: "HTML", //TODO приминить паттерн стратегия
 			Text:      printOrderSummaryReport(marketplace.orderSummaryReport(m.Message.From.Id, filter)),
 		})
@@ -845,12 +850,9 @@ func CreateButtonsBot[Q buttonTelegrmBot](b []ButtonBot[Q]) [][]Q {
 	return matrix
 }
 
-func (m *Message) deleteMessage() bool {
+func (t *TelegramBot) deleteMessage(body interface{}) bool {
 	client := &http.Client{}
-	requestBody, err := json.Marshal(map[string]int64{
-		"chat_id":    (*m).Chat.Id,
-		"message_id": (*m).MessageId,
-	})
+	requestBody, err := json.Marshal(&body)
 	if err != nil {
 		log.Fatalln(err)
 		return false
