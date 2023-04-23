@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5e500cf1-a3ac-449d-987a-b20e4ef87b1c" name="Changes" comment="Добавлены структуры для удаления сообщений из телеграмм канала" />
+    <list default="true" id="5e500cf1-a3ac-449d-987a-b20e4ef87b1c" name="Changes" comment="fix при отмененных заказах себестоимость товара не будет учитываться" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -155,6 +155,7 @@
       <workItem from="1682258906643" duration="370000" />
       <workItem from="1682259407793" duration="1208000" />
       <workItem from="1682261403061" duration="496000" />
+      <workItem from="1682261960731" duration="442000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1671364560962</created>
@@ -205,7 +206,21 @@
       <option name="project" value="LOCAL" />
       <updated>1674986021672</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="fix">
+      <created>1682262033076</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1682262033076</updated>
+    </task>
+    <task id="LOCAL-00009" summary="fix при отмененных заказах себестоимость товара не будет учитываться">
+      <created>1682262175613</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1682262175613</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -227,7 +242,9 @@
     <MESSAGE value="Исправлены ораф. ощибки" />
     <MESSAGE value="рефактороинг" />
     <MESSAGE value="Добавлены структуры для удаления сообщений из телеграмм канала" />
-    <option name="LAST_COMMIT_MESSAGE" value="Добавлены структуры для удаления сообщений из телеграмм канала" />
+    <MESSAGE value="fix" />
+    <MESSAGE value="fix при отмененных заказах себестоимость товара не будет учитываться" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix при отмененных заказах себестоимость товара не будет учитываться" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
