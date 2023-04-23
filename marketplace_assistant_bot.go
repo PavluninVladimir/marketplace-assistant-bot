@@ -1197,12 +1197,12 @@ func (m *OzonMarketplace) orderSummaryReport(userId int64, filter FilterFbo) Сo
 			// TODO массовое изменение товаров или горутину
 			user.setProductGroupSetting(userId, replacer.Replace(product.Name))
 			if aa.Status != Cancelled.String() {
+				pp += mp[replacer.Replace(product.Name)]
 				if price, err := strconv.ParseFloat(product.Price, 64); err == nil {
 					crfbo.SumCount = decimal.NewFromFloat(crfbo.SumCount.InexactFloat64() + price)
 				}
 				bb[replacer.Replace(product.Name)] += product.Quantity
 			} else {
-				pp += mp[replacer.Replace(product.Name)]
 				crfbo.CancelledTotalCount += product.Quantity
 				crfbo.CancelledProducts[replacer.Replace(product.Name)] += product.Quantity
 			}

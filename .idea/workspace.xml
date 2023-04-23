@@ -4,112 +4,56 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5e500cf1-a3ac-449d-987a-b20e4ef87b1c" name="Changes" comment="fix при отмененных заказах себестоимость товара не будет учитываться" />
+    <list default="true" id="6346d175-9b1e-4ad5-898a-c75e8ad7e06e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/marketplace_assistant_bot.go" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace_assistant_bot.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Go File" />
-      </list>
-    </option>
-  </component>
   <component name="GOROOT" url="file:///usr/local/go" />
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="feature/save_name_group_product" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="2J4zxEqXMheOgfZ4hM2VbD47Nac" />
+  <component name="ProjectId" id="2OpglbjouliPBgxs3xrePQzpdSl" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;database.data.extractors.current.export.id&quot;: &quot;JSON-Groovy.json.groovy&quot;,
-    &quot;database.data.extractors.current.id&quot;: &quot;JSON-Groovy.json.groovy&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;openjdk-18&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.scopes&quot;,
-    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-  },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mongo&quot;
-    ]
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "dart.analysis.tool.window.visible": "false",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "show.migrate.to.gradle.popup": "false",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Go Build.App Engine">
-    <configuration name="App Engine" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="marketplace-assistant-bot" />
-      <working_directory value="$PROJECT_DIR$" />
-      <envs>
-        <env name="TOKEN_TELEGRAM_BOT" value="5795687183:AAHw5BQfZT8lBR-L6vzKe0f9HJ4tFKt__yY" />
-      </envs>
-      <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
+}]]></component>
+  <component name="RunManager">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="marketplace-assistant-bot" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
       <package value="market-place-assistant-bot" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestCreateInlineKeyboardButtonsBot in market-place-assistant-bot" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="marketplace-assistant-bot" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="market-place-assistant-bot" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestCreateInlineKeyboardButtonsBot\E$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestCreateInlineKeyboardButtonsBot/Test1 in market-place-assistant-bot" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="marketplace-assistant-bot" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="market-place-assistant-bot" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestCreateInlineKeyboardButtonsBot\E$/^\QTest1\E$" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
-      <module name="marketplace-assistant-bot" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="DIRECTORY" />
       <package value="market-place-assistant-bot" />
@@ -117,140 +61,24 @@
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
       <method v="2" />
-    </configuration>
-    <configuration default="true" type="JetRunConfigurationType">
-      <module name="marketplace-assistant-bot" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="marketplace-assistant-bot" />
-      <option name="filePath" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
     </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="5e500cf1-a3ac-449d-987a-b20e4ef87b1c" name="Changes" comment="" />
-      <created>1671352389009</created>
+      <changelist id="6346d175-9b1e-4ad5-898a-c75e8ad7e06e" name="Changes" comment="" />
+      <created>1682263090452</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1671352389009</updated>
-      <workItem from="1671352390748" duration="30438000" />
-      <workItem from="1671869858674" duration="882000" />
-      <workItem from="1671872049398" duration="5627000" />
-      <workItem from="1671878908611" duration="15864000" />
-      <workItem from="1671986743482" duration="6890000" />
-      <workItem from="1672079083349" duration="110812000" />
-      <workItem from="1673893770210" duration="3837000" />
-      <workItem from="1674752346395" duration="26592000" />
-      <workItem from="1676096140718" duration="24870000" />
-      <workItem from="1676366941495" duration="15345000" />
-      <workItem from="1681039269695" duration="343000" />
-      <workItem from="1681934289698" duration="15947000" />
-      <workItem from="1682258906643" duration="370000" />
-      <workItem from="1682259407793" duration="1208000" />
-      <workItem from="1682261403061" duration="496000" />
-      <workItem from="1682261960731" duration="442000" />
+      <updated>1682263090452</updated>
+      <workItem from="1682263091788" duration="625000" />
     </task>
-    <task id="LOCAL-00001" summary="init">
-      <created>1671364560962</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1671364560962</updated>
-    </task>
-    <task id="LOCAL-00002" summary="init">
-      <created>1671385295464</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1671385295464</updated>
-    </task>
-    <task id="LOCAL-00003" summary="init">
-      <created>1673247711148</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1673247711149</updated>
-    </task>
-    <task id="LOCAL-00004" summary="init">
-      <created>1673249349726</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1673249349726</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Исправлены ораф. ощибки">
-      <created>1673287893299</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1673287893299</updated>
-    </task>
-    <task id="LOCAL-00006" summary="рефактороинг">
-      <created>1674018896632</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1674018896632</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Добавлены структуры для удаления сообщений из телеграмм канала">
-      <created>1674986021672</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1674986021672</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fix">
-      <created>1682262033076</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1682262033076</updated>
-    </task>
-    <task id="LOCAL-00009" summary="fix при отмененных заказах себестоимость товара не будет учитываться">
-      <created>1682262175613</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1682262175613</updated>
-    </task>
-    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="init" />
-    <MESSAGE value="Исправлены ораф. ощибки" />
-    <MESSAGE value="рефактороинг" />
-    <MESSAGE value="Добавлены структуры для удаления сообщений из телеграмм канала" />
-    <MESSAGE value="fix" />
-    <MESSAGE value="fix при отмененных заказах себестоимость товара не будет учитываться" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix при отмененных заказах себестоимость товара не будет учитываться" />
-  </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
   </component>
 </project>
