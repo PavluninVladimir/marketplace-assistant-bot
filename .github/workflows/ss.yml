@@ -1,0 +1,27 @@
+name: Go app with Autocannon load test
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.3'
+
+      - name: Build Go app
+        run: go build -o app
+
+      - name: Run Autocannon load test
+        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8000
+
+      - name: Start Go app
+        run: ./app
