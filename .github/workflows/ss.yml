@@ -20,11 +20,17 @@ jobs:
         with:
           go-version: '1.19.3'
 
-      - name: Build Go app
+      - name: Build Go App
         run: go build -o app
 
-      - name: Run Autocannon load test
-        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
+      - name: Start Go App
+        run: ./app &
 
-      - name: Start Go app
-        run: ./app
+      - name: Wait for App to Start
+        run: sleep 5s
+
+      - name: Run Autocannon Load Test
+        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8000
+
+      - name: Stop Go App
+        run: pkill app
