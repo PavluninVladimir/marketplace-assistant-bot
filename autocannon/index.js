@@ -1,7 +1,7 @@
 const autocannon = require('autocannon');
 
 const opts = {
-  url: 'https://bot.my-infant.com/static/',
+  url: 'http://localhost:8181',
   connections: 100,
   duration: 10
 };
