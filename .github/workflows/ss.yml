@@ -30,20 +30,18 @@ jobs:
         run: sleep 5s
 
       - name: Run Autocannon Load Test
-        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
+        run:  |
+              set -e
+              npx autocannon -c 10 -d 5 -p 10 http://localhost:8181 | tee output.txt
+              export AVG=$(grep 'Avg' output.txt | awk '{print $2}' | tr -d ',')
+              if (( $(echo "$AVG < 10000" | bc -l) )); then
+                echo "Average response time is less than 10000ms: $AVG ms"
+                exit 1
+              else
+                echo "Average response time is greater than or equal to 10000ms: $AVG ms"
+              fi
         env:
           GITHUB_OUTPUT: ${{ steps.server.outputs.pid }}
-
-      - name: Get Autocannon output
-        run: echo "${{ steps.autocannon.outputs.stdout }}" | grep "Avg:" | sed -E 's/Avg:[[:space:]]+([0-9]+)/\1/' | tee output.txt
-        id: autocannon_output
-
-      - name: Check Autocannon Avg
-        run: |
-          if (( $(echo "$avg < 10000" | bc -l) )); then
-          echo "Autocannon Avg is less than 10000"
-          exit 1
-          fi
 
       - name: Stop Go App
         run: pkill app
