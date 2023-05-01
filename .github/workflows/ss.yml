@@ -39,8 +39,7 @@ jobs:
          shell: bash
 
       - name: Get Autocannon average
-        run: |
-          echo "${{ steps.autocannon.outputs }}"
+        run: echo "${{ steps.autocannon.outputs }}" | jq .
         id: autocannon_output
 
       - name: Stop Go App
