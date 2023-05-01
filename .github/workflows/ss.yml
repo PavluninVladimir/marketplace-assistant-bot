@@ -30,17 +30,18 @@ jobs:
         run: sleep 5s
 
       - name: Run Autocannon Load Test
-        run: |
-          npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
-          echo "::set-output name=avg::$(cat result.json | jq '.requests.average')"
+        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
+        env:
+          GITHUB_OUTPUT: ${{ steps.server.outputs.pid }}
 
-      - name: Check performance
+      - name: Get Autocannon output
+        run: echo "${{ steps.autocannon.outputs.stdout }}" | grep "Avg:" | sed -E 's/Avg:[[:space:]]+([0-9]+)/\1/' | tee output.txt
+        id: autocannon_output
+
+      - name: Check Autocannon Avg
         run: |
-          avg=$(echo ${{ steps.load-test.outputs.avg }})
-          if (( $(echo "$avg >= 10000" | bc -l) )); then
-          echo "Performance test passed. Average response time: $avg"
-          else
-          echo "Performance test failed. Average response time: $avg"
+          if [ ${{ steps.autocannon_output.outputs.avg }} -lt 10000 ]; then
+          echo "Autocannon Avg is less than 10000"
           exit 1
           fi
 
