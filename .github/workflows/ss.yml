@@ -31,19 +31,20 @@ jobs:
 
       - name: Run Autocannon load test
         id: autocannon
-        run: npm install autocannon && node autocannon/index.js | jq '.requests.average'
+        run: npm install autocannon && node autocannon/index.js | tee autocannon-output.json
         env:
           GITHUB_OUTPUT: ${{ steps.server.outputs.pid }}
 
-
-      - name: Get Autocannon output
-        run: echo "${{ steps.autocannon.outputs.stdout }}"
+      - name: Get Autocannon average
+        run: |
+          average=$(jq -r '.requests.average' autocannon-output.json)
+          echo "::set-output name=avg::$average"
         id: autocannon_output
 
-      - name: Check Autocannon Avg
+      - name: Check Autocannon average
         run: |
-          if [ ${{ steps.autocannon_output.outputs.avg }} -lt 10000 ]; then
-          echo "Autocannon Avg is less than 10000"
+          if (( $(echo "${{ steps.autocannon_output.outputs.avg }} < 10000" | bc -l) )); then
+          echo "Autocannon average is less than 10000"
           exit 1
           fi
 
