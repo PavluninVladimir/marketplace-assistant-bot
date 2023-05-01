@@ -31,14 +31,14 @@ jobs:
 
       - name: Run Autocannon load test
         id: autocannon
-        run: npm install autocannon && node autocannon/index.js | tee autocannon-output.json
-        env:
-          GITHUB_OUTPUT: ${{ steps.server.outputs.pid }}
+        run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "JSON_RESPONSE<<$EOF" >> "$GITHUB_ENV"
+          npm install autocannon && node autocannon/index.js  >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
 
       - name: Get Autocannon average
-        run: |
-          average=$(jq -r '.requests.average' autocannon-output.json)
-          echo "::set-output name=avg::$average"
+        run: echo "${{ steps.autocannon.outputs.JSON_RESPONSE }}""
         id: autocannon_output
 
       - name: Check Autocannon average
