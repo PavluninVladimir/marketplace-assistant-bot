@@ -38,7 +38,7 @@ jobs:
 
 
       - name: Get Autocannon output
-        run: echo "${{ steps.autocannon.outputs.stdout }}" | grep "average:" | sed -E 's/average:[[:space:]]+([0-9]+)/\1/' | tee output.txt
+        run: echo "${{ steps.autocannon.outputs.stdout }}"
         id: autocannon_output
 
       - name: Check Autocannon Avg
