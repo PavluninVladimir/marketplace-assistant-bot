@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      TOKEN_TELEGRAM_BOT: 21212111
+      TOKEN_TELEGRAM_BOT: 212121
 
     steps:
     - uses: actions/checkout@v2
