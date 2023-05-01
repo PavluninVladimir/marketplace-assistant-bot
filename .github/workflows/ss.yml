@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Autocannon load test
         run: |
-          node autocannon/index.js
+          $npm install autocannon && node autocannon/index.js
           if (( $(echo "$GITHUB_OUTPUT < 10000" | bc -l) )); then
             echo "Load test failed"
             kill $APP_PID
