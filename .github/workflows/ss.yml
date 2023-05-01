@@ -39,8 +39,7 @@ jobs:
 
       - name: Get Autocannon average
         run: |
-          average=$(jq -r '.requests.average' ${{ env.JSON_RESPONSE }})
-          echo ${{ average }}
+         echo $(jq -r '.requests.average' ${{ env.JSON_RESPONSE }})
         id: autocannon_output
 
       - name: Check Autocannon average
