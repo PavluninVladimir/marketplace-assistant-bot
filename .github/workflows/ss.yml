@@ -43,7 +43,7 @@ jobs:
           fi
         env:
           APP_URL: http://localhost:8181
-          GITHUB_OUTPUT: $(node /path/to/script.js | grep Avg | awk '{print $2}')
+          GITHUB_OUTPUT: $(node autocannon/index.js | grep Avg | awk '{print $2}')
 
       - name: Stop Go App
         run: pkill app
