@@ -40,7 +40,7 @@ jobs:
 
       - name: Check Autocannon Avg
         run: |
-          if [ ${{ steps.autocannon_output.outputs.avg }} -lt 10000 ]; then
+          if (( $(echo "$avg < 10000" | bc -l) )); then
           echo "Autocannon Avg is less than 10000"
           exit 1
           fi
