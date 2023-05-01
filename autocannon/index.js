@@ -1,4 +1,4 @@
-const autocannon = require('autocannon');
+const autocannon= require('autocannon');
 
 const opts = {
   url: 'http://localhost:8181',
