@@ -39,7 +39,7 @@ jobs:
          shell: bash
 
       - name: Get Autocannon average
-        run: echo "${{ env.JSON_RESPONSE }}" | jq -r "."
+        run: echo "${{ env.JSON_RESPONSE }}" | jq "."
         id: autocannon_output
 
       - name: Stop Go App
