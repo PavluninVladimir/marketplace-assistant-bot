@@ -1,12 +1,12 @@
 name: Go Build
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      TOKEN_TELEGRAM_BOT: 21212111
+      TOKEN_TELEGRAM_BOT: 2121211
 
     steps:
     - uses: actions/checkout@v2
@@ -14,7 +14,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: '1.17.0'
+        go-version: '1.17.3'
 
     - name: Get dependencies
       run: go mod download
