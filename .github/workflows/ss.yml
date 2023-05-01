@@ -30,7 +30,7 @@ jobs:
         run: sleep 5s
 
       - name: Run Autocannon Load Test
-        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8000
+        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
 
       - name: Stop Go App
         run: pkill app
