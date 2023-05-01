@@ -31,8 +31,7 @@ jobs:
 
       - name: Run Autocannon load test
         id: autocannon
-        run: |
-          npm install autocannon && node autocannon/index.js
+        run: npm install autocannon && node autocannon/index.js | jq '.requests.average'
         env:
           GITHUB_OUTPUT: ${{ steps.server.outputs.pid }}
 
