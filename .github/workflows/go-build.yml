@@ -1,4 +1,4 @@
-name: Go Build
+name: GoBuild
 
 on:
   pull_request:
