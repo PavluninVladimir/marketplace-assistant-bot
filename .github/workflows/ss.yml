@@ -30,7 +30,19 @@ jobs:
         run: sleep 5s
 
       - name: Run Autocannon Load Test
-        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
+        run: |
+          npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
+          echo "::set-output name=avg::$(cat result.json | jq '.requests.average')"
+
+      - name: Check performance
+        run: |
+          avg=$(echo ${{ steps.load-test.outputs.avg }})
+          if (( $(echo "$avg >= 10000" | bc -l) )); then
+          echo "Performance test passed. Average response time: $avg"
+          else
+          echo "Performance test failed. Average response time: $avg"
+          exit 1
+          fi
 
       - name: Stop Go App
         run: pkill app
