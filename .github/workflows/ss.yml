@@ -36,5 +36,17 @@ jobs:
         env:
           GITHUB_OUTPUT: ${{ steps.server.outputs.pid }}
 
+
+      - name: Get Autocannon output
+        run: echo "${{ steps.autocannon.outputs.stdout }}" | grep "average:" | sed -E 's/average:[[:space:]]+([0-9]+)/\1/' | tee output.txt
+        id: autocannon_output
+
+      - name: Check Autocannon Avg
+        run: |
+          if [ ${{ steps.autocannon_output.outputs.avg }} -lt 10000 ]; then
+          echo "Autocannon Avg is less than 10000"
+          exit 1
+          fi
+
       - name: Stop Go App
         run: pkill app
