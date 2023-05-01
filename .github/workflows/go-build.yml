@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TOKEN_TELEGRAM_BOT: 21212111
 
     steps:
     - uses: actions/checkout@v2
