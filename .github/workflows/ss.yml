@@ -40,7 +40,7 @@ jobs:
 
       - name: Get Autocannon average
         run: |
-          echo ${{ env.JSON_RESPONSE }} | jq '.requests.average'
+          echo "${{ steps.autocannon.outputs }}"
         id: autocannon_output
 
       - name: Stop Go App
