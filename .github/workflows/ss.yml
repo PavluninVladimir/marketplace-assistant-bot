@@ -30,7 +30,7 @@ jobs:
         run: sleep 5s
 
       - name: Run Autocannon Load Test
-        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
+        run: npx autocannon -c 10 -d 5 -p 10 -j http://localhost:8181 | jq '.["requests"]["average"]'
         env:
           GITHUB_OUTPUT: ${{ steps.server.outputs.pid }}
 
