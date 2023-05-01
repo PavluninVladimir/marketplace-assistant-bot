@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Пример Grid для header, footer и формы</title>
+    <style>
+        /* Grid-контейнер */
+        body {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: calc(100vh - 20px);
+        }
+
+        /* Стиль для header */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+        }
+
+        /* Стиль для footer */
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+        }
+
+        /* Стиль для центрального содержимого */
+        main {
+            padding: 10px;
+            margin: auto 0;
+        }
+
+        /* Стиль для центрирования формы */
+        .center {
+            margin: auto;
+            padding: 10px;
+        }
+
+        /* Стиль для формы */
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            font-size: 50px;
+        }
+
+        /* Стиль для полей даты */
+        form input[type="date"] {
+            flex-grow: 1;
+            margin-right: 10px;
+            font-size: -webkit-xxx-large;
+        }
+
+        form input {
+            margin-bottom: 10px;
+            font-size: -webkit-xxx-large;
+        }
+
+        @media (max-width: 600px) {
+            form input {
+                width: 100%;
+            }
+        }
+    </style>
+    <!-- Подключение стилей для flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+</head>
+
+<body>
+    <header>
+        <h1>Мой заголовок</h1>
+    </header>
+    <main>
+        <div class="center">
+            <form>
+                <div>
+                    <label for="from">C </label>
+                    <input type="date" id="from" name="from">
+                </div>
+                <div>
+                    <label for="to">По</label>
+                    <input type="date" id="to" name="to">
+                </div>
+            </form>
+        </div>
+    </main>
+    <footer>
+        <p>Это мой подвал.</p>
+    </footer>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        let tg = window.Telegram.WebApp; //получаем объект webapp телеграма 
+        tg.expand(); //расширяем на все окно  
+        tg.MainButton.show()
+        tg.MainButton.text = "Сформировать отчет"; //изменяем текст кнопки 
+        // tg.MainButton.setText("Changed Text1"); //изменяем текст кнопки иначе
+        tg.MainButton.textColor = "#F55353"; //изменяем цвет текста кнопки
+        tg.MainButton.color = "#143F6B"; //изменяем цвет бэкграунда кнопки
+        tg.MainButton.setParams({ "color": "#143F6B" }); //так изменяются все параметры 
+        // btn.addEventListener('click', function () { //вешаем событие на нажатие html-кнопки
+        //     if (tg.MainButton.isVisible) { //если кнопка показана 
+        //         tg.MainButton.hide() //скрываем кнопку 
+        //     }
+        //     else { //иначе
+        //         tg.MainButton.show() //показываем 
+        //     }
+        // });
+        // let btnED = document.getElementById("btnED"); //получаем кнопку активировать/деактивировать
+        // btnED.addEventListener('click', function () { //вешаем событие на нажатие html-кнопки
+        //     if (tg.MainButton.isActive) { //если кнопка показана 
+        //         tg.MainButton.setParams({ "color": "#E0FFFF" }); //меняем цвет
+        //         tg.MainButton.disable() //скрываем кнопку 
+        //     }
+        //     else { //иначе
+        //         tg.MainButton.setParams({ "color": "#143F6B" }); //меняем цвет
+        //         tg.MainButton.enable() //показываем 
+        //     }
+        // });
+        Telegram.WebApp.onEvent('mainButtonClicked', function () {
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+            tg.sendData(`${from}::${to}`);
+            //при клике на основную кнопку отправляем данные в строковом виде
+        });
+        // let usercard = document.getElementById("usercard"); //получаем блок usercard 
+
+        // let profName = document.createElement('p'); //создаем параграф
+//         profName.innerText = `${tg.initDataUnsafe.user.first_name}
+// ${tg.initDataUnsafe.user.last_name}
+// ${tg.initDataUnsafe.user.username} (${tg.initDataUnsafe.user.language_code})`;
+        //выдем имя, "фамилию", через тире username и код языка
+        // usercard.appendChild(profName); //добавляем 
+
+        // let userid = document.createElement('p'); //создаем еще параграф 
+        // userid.innerText = `${tg.initDataUnsafe.user.id}`; //показываем user_id
+        // usercard.appendChild(userid); //добавляем
+    </script>
+
+</body>
+
+</html>

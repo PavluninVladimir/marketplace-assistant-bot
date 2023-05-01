@@ -1,0 +1,34 @@
+name: Go Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN_TELEGRAM_BOT: 21212111
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.17.0'
+
+    - name: Get dependencies
+      run: go mod download
+
+    - name: Build
+      run: go build -v .
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Check for errors
+      run: |
+        if [ ${{ job.status }} != 'success' ]; then
+          echo "Build or test failed, preventing merge"
+          exit 1
+        fi
+      if: always()
