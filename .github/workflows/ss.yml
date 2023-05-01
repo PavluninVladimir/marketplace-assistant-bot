@@ -38,7 +38,7 @@ jobs:
           echo "$EOF" >> "$GITHUB_ENV"
 
       - name: Get Autocannon average
-        run: echo "${{ env.JSON_RESPONSE }}" | jq -r '.requests.average'
+        run: echo "${{ env.JSON_RESPONSE }}" | jq  '.requests.average'
         id: autocannon_output
 
       - name: Check Autocannon average
