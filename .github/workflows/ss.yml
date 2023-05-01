@@ -38,7 +38,7 @@ jobs:
           echo "$EOF" >> "$GITHUB_ENV"
 
       - name: Get Autocannon average
-        run: jq -n "$JSON_RESPONSE" | jq '.latency.average'
+        run: jq -n "$JSON_RESPONSE"
         id: autocannon_output
 
       - name: Check Autocannon average
