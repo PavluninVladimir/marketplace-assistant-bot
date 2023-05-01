@@ -24,7 +24,7 @@ jobs:
         run: go build -o app
 
       - name: Run Autocannon load test
-        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8000
+        run: npx autocannon -c 10 -d 5 -p 10 http://localhost:8181
 
       - name: Start Go app
         run: ./app
