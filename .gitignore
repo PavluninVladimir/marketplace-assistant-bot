@@ -15,5 +15,5 @@
 # vendor/
 
 .DS_Store
-.idea/
 /autocannon/node_modules/
+/.idea/

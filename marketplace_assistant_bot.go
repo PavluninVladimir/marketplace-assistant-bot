@@ -5,12 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/shopspring/decimal"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
 	"log"
 	"net/http"
@@ -19,6 +13,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/shopspring/decimal"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
@@ -143,6 +144,11 @@ type Chat struct {
 	Location                           ChatLocation    `json:"location"`
 }
 
+type WebAppData struct {
+	ButtonText string `json:"button_text"`
+	Data       string `json:"data"`
+}
+
 type Message struct {
 	MessageId            int64           `json:"message_id"`
 	MessageThreadId      int64           `json:"message_thread_id"`
@@ -166,6 +172,7 @@ type Message struct {
 	Entities             []MessageEntity `json:"entities"`
 	NewChatMembers       []User          `json:"new_chat_members"`
 	LeftChatMember       User            `json:"left_chat_member"`
+	WebAppData           WebAppData      `json:"web_app_data"`
 }
 
 type CallbackQuery struct {
@@ -208,14 +215,14 @@ type LoginUrl struct {
 	RequestWriteAccess bool   `json:"request_write_access"`
 }
 type InlineKeyboardButton struct {
-	Text                         string     `json:"text"`
-	Url                          string     `json:"url"`
-	CallbackData                 string     `json:"callback_data"`
-	WebApp                       WebAppInfo `json:"web_app"`
-	LoginUrl                     LoginUrl   `json:"login_url"`
-	SwitchInlineQuery            string     `json:"switch_inline_query"`
-	SwitchInlineQueryCurrentChat string     `json:"switch_inline_query_current_chat"`
-	Pay                          bool       `json:"pay"`
+	Text                         string      `json:"text"`
+	Url                          string      `json:"url,omitempty"`
+	CallbackData                 string      `json:"callback_data,omitempty"`
+	WebApp                       *WebAppInfo `json:"web_app,omitempty"`
+	LoginUrl                     *LoginUrl   `json:"login_url,omitempty"`
+	SwitchInlineQuery            string      `json:"switch_inline_query,omitempty"`
+	SwitchInlineQueryCurrentChat string      `json:"switch_inline_query_current_chat,omitempty"`
+	Pay                          bool        `json:"pay,omitempty"`
 }
 type KeyboardButtonPollType struct {
 	Type string `json:"type,omitempty"`
@@ -441,6 +448,7 @@ const (
 	SetClientIdOzonSetting CommandBot = iota
 	GenReportToday
 	GenReportYesterday
+	GenReportArbitraryDate
 )
 
 func (c CommandBot) String() string {
@@ -448,6 +456,7 @@ func (c CommandBot) String() string {
 		"setclientidozonsetting",
 		"Сформировать отчет за сегодня",
 		"Сформировать отчет за вчера",
+		"Сформировать отчет за произвольную дату",
 	}[c]
 }
 
@@ -550,6 +559,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/webhooks", webHooks)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
 	router.HandleFunc("/", indexHandler)
 	http.Handle("/", router)
 
@@ -888,6 +898,9 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			ReplyMarkup: ReplyKeyboardMarkup{Keyboard: CreateButtonsBot[KeyboardButton]([]ButtonBot[KeyboardButton]{
 				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportToday.String()}},
 				{Row: 1, Col: 2, Button: KeyboardButton{Text: GenReportYesterday.String()}},
+				{Row: 2, Col: 1, Button: KeyboardButton{Text: GenReportArbitraryDate.String(), WebApp: &WebAppInfo{
+					Url: "https://bot.my-infant.com/static/",
+				}}},
 			}),
 				ResizeKeyboard: true},
 		})
@@ -912,6 +925,22 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			Since:  time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(-(24 * time.Hour)).Format(time.RFC3339),
 			Status: "",
 			To:     time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Add(-(24 * time.Hour)).Format(time.RFC3339),
+		}
+		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			ChatId:    mes.Chat.Id,
+			ParseMode: "HTML", //TODO приминить паттерн стратегия
+			Text:      printOrderSummaryReport(marketplace.orderSummaryReport(m.Message.From.Id, filter)),
+		})
+	}
+	if mes.WebAppData.ButtonText == GenReportArbitraryDate.String() {
+		var marketplace Marketplace = &OzonMarketplace{}
+		data := strings.Split(mes.WebAppData.Data, "::")
+		from, _ := time.Parse("2006-01-02", data[0])
+		to, _ := time.Parse("2006-01-02", data[1])
+		filter := FilterFbo{
+			Since:  from.Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(-(24 * time.Hour)).Format(time.RFC3339),
+			Status: "",
+			To:     to.Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Add(-(24 * time.Hour)).Format(time.RFC3339),
 		}
 		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
@@ -1180,17 +1209,27 @@ func (m *OzonMarketplace) orderSummaryReport(userId int64, filter FilterFbo) Сo
 	crfbo.CancelledProducts = make(map[string]int)
 	var bb = make(map[string]int)
 	replacer := strings.NewReplacer("Получешки Colibri ", "", "Полупальцы Colibri ", "")
-	response, err := fboListHandler(userId, ListBodyRequestFBO{
-		Dir:    "ASC",
-		Filter: filter,
-		Limit:  100,
-		Offset: 0,
-	})
-	if err != nil {
-		panic(err)
+	limit := 1000
+	offset := 0
+	var resp = ListResponseFBO{}
+	for {
+		response, err := fboListHandler(userId, ListBodyRequestFBO{
+			Dir:    "ASC",
+			Filter: filter,
+			Limit:  int64(limit),
+			Offset: int64(offset),
+		})
+		resp.Result = append(resp.Result, response.Result...)
+		if err != nil {
+			panic(err)
+		}
+		if len(response.Result) == 0 {
+			break
+		}
+		offset += limit
 	}
 	var pp float64
-	for _, aa := range response.Result {
+	for _, aa := range resp.Result {
 		for _, product := range aa.Products {
 			crfbo.TotalCount += product.Quantity
 			user := UserDB{}

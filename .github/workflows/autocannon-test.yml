@@ -1,0 +1,42 @@
+name: Go app with Autocannon load test
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      TOKEN_TELEGRAM_BOT: 2121211
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.3'
+
+      - name: Build Go App
+        run: go build -o app
+
+      - name: Start Go App
+        run: ./app &
+
+      - name: Wait for App to Start
+        run: sleep 5s
+
+      -  name: Run Autocannon load test
+         id: autocannon
+         run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "JSON_RESPONSE<<$EOF" >> "$GITHUB_ENV"
+          npm install autocannon && node autocannon/index.js  >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
+         shell: bash
+
+      - name: Stop Go App
+        run: pkill app
