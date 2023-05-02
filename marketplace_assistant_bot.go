@@ -896,8 +896,8 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			ChatId: m.CallbackQuery.Message.Chat.Id,
 			Text:   "sdfsf",
 			ReplyMarkup: ReplyKeyboardMarkup{Keyboard: CreateButtonsBot[KeyboardButton]([]ButtonBot[KeyboardButton]{
-				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportToday.String()}},
-				{Row: 1, Col: 2, Button: KeyboardButton{Text: GenReportYesterday.String()}},
+				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportYesterday.String()}},
+				{Row: 1, Col: 2, Button: KeyboardButton{Text: GenReportToday.String()}},
 				{Row: 2, Col: 1, Button: KeyboardButton{Text: GenReportArbitraryDate.String(), WebApp: &WebAppInfo{
 					Url: "https://bot.my-infant.com/static/",
 				}}},
