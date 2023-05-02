@@ -10,6 +10,6 @@ autocannon(opts, (err, result) => {
   if (err) {
     console.error(err);
   } else {
-    console.log(result);
+    console.log(result.requests.average);
   }
 });
