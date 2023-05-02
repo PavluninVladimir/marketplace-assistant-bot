@@ -38,9 +38,5 @@ jobs:
           echo "$EOF" >> "$GITHUB_ENV"
          shell: bash
 
-      - name: Get Autocannon average
-        run: echo "${{ env.JSON_RESPONSE }}" | jq -r '.'
-        id: autocannon_output
-
       - name: Stop Go App
         run: pkill app
