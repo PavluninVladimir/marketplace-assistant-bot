@@ -4,31 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="остальные правки">
-      <change afterPath="$PROJECT_DIR$/bot.db" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/db.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/db_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.work.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/gqlgen.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/graph/generated.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/graph/model/models_gen.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/graph/resolver.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/graph/schema.graphqls" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/graph/schema.resolvers.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gqlgen/server.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/telegram/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/telegram/telegram.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/go-build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/go-build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/marketplace_assistant_bot.go" beforeDir="false" afterPath="$PROJECT_DIR$/marketplace_assistant_bot.go" afterDir="false" />
-    </list>
+    <list default="true" id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="остальные правки" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -201,12 +177,32 @@
       <updated>1703410458247</updated>
       <workItem from="1703410462396" duration="19597000" />
       <workItem from="1703672504033" duration="90000" />
-      <workItem from="1703672613859" duration="26847000" />
+      <workItem from="1703672613859" duration="27167000" />
     </task>
+    <task id="LOCAL-00001" summary="остальные правки">
+      <option name="closed" value="true" />
+      <created>1704478830085</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1704478830085</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
