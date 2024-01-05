@@ -12,12 +12,13 @@ jobs:
       TOKEN_TELEGRAM_BOT: 2121211
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
         go-version: '1.21.5'
+    - run: go version
 
     - name: Get dependencies
       run: go mod download
