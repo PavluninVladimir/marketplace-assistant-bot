@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="fix2">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="fix4" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -179,7 +177,7 @@
       <updated>1703410458247</updated>
       <workItem from="1703410462396" duration="19597000" />
       <workItem from="1703672504033" duration="90000" />
-      <workItem from="1703672613859" duration="28152000" />
+      <workItem from="1703672613859" duration="28425000" />
     </task>
     <task id="LOCAL-00001" summary="остальные правки">
       <option name="closed" value="true" />
@@ -205,7 +203,23 @@
       <option name="project" value="LOCAL" />
       <updated>1704479513303</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="fix3">
+      <option name="closed" value="true" />
+      <created>1704479987362</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1704479987362</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix4">
+      <option name="closed" value="true" />
+      <created>1704480257832</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1704480257832</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -227,7 +241,9 @@
     <MESSAGE value="остальные правки" />
     <MESSAGE value="fix1" />
     <MESSAGE value="fix2" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix2" />
+    <MESSAGE value="fix3" />
+    <MESSAGE value="fix4" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix4" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
