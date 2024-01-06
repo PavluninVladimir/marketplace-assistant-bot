@@ -1,13 +1,305 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="fix5">
+      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marketplace-assistant-bot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/go-build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/go-build.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.work" beforeDir="false" afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.work.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.work.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/go.sum" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="new-sketch" />
+        <option value="Go File" />
+        <option value="Go Application" />
+        <option value="GraphQL File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file://$USER_HOME$/Development/golang/go1.21.5/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="true" />
+  </component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2Zz2C96jgkcDTqdtckIGvwZGuNd" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "DefaultGoTemplateProperty": "Go Application",
+    "Docker.Dockerfile.executor": "Run",
+    "Go Build.go build gqlgen.executor": "Run",
+    "Go Build.go build marketplace-assistant-bot.executor": "Run",
+    "Go Test.TestTelegramBot_addBot in db.executor": "Run",
+    "Go Test.TestTelegramBot_addBot/Добавление_бота in db.executor": "Run",
+    "Go Test.TestTelegramBot_listBots/Добавление_бота in db.executor": "Run",
+    "Go Test.Test_addBot/CreatetableBot in db.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "feature/new",
+    "go.import.settings.migrated": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.16015625",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "settings.jsgraphql",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/gqlgen/graph" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Docker.Dockerfile">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="marketplace-assistant-bot" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build gqlgen" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="gqlgen" />
+      <working_directory value="$PROJECT_DIR$/gqlgen" />
+      <kind value="PACKAGE" />
+      <package value="gqlgen" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/gqlgen/server.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build marketplace-assistant-bot" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="marketplace-assistant-bot" />
+      <working_directory value="$PROJECT_DIR$" />
+      <envs>
+        <env name="TOKEN_TELEGRAM_BOT" value="5795687183:AAHw5BQfZT8lBR-L6vzKe0f9HJ4tFKt__yY" />
+      </envs>
+      <kind value="PACKAGE" />
+      <package value="marketplace-assistant-bot" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/marketplace_assistant_bot.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestTelegramBot_addBot in db" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="db" />
+      <working_directory value="$PROJECT_DIR$/db" />
+      <kind value="PACKAGE" />
+      <package value="db" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestTelegramBot_addBot\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestTelegramBot_addBot/Добавление_бота in db" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="db" />
+      <working_directory value="$PROJECT_DIR$/db" />
+      <kind value="PACKAGE" />
+      <package value="db" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestTelegramBot_addBot\E$/^\QДобавление_бота\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="marketplace-assistant-bot" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Dockerfile" type="docker-deploy" factoryName="dockerfile" temporary="true" server-name="Docker">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="portBindings">
+            <list>
+              <DockerPortBindingImpl>
+                <option name="containerPort" value="8181" />
+                <option name="hostIp" value="0.0.0.0" />
+                <option name="hostPort" value="8181" />
+              </DockerPortBindingImpl>
+            </list>
+          </option>
+          <option name="sourceFilePath" value="Dockerfile" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
+      <deployment type="dockerfile" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Docker.Dockerfile" />
+      <item itemvalue="Go Build.go build gqlgen" />
+      <item itemvalue="Go Build.go build marketplace-assistant-bot" />
+      <item itemvalue="Go Test.TestTelegramBot_addBot in db" />
+      <item itemvalue="Go Test.TestTelegramBot_addBot/Добавление_бота in db" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Docker.Dockerfile" />
+        <item itemvalue="Go Build.go build marketplace-assistant-bot" />
+        <item itemvalue="Go Build.go build gqlgen" />
+        <item itemvalue="Go Test.TestTelegramBot_addBot/Добавление_бота in db" />
+        <item itemvalue="Go Test.TestTelegramBot_addBot in db" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="остальные правки" />
+      <created>1703410458247</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1703410458247</updated>
+      <workItem from="1703410462396" duration="19597000" />
+      <workItem from="1703672504033" duration="90000" />
+      <workItem from="1703672613859" duration="37683000" />
+    </task>
+    <task id="LOCAL-00001" summary="остальные правки">
+      <option name="closed" value="true" />
+      <created>1704478830085</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1704478830085</updated>
+    </task>
+    <task id="LOCAL-00002" summary="fix1">
+      <option name="closed" value="true" />
+      <created>1704479064658</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1704479064658</updated>
+    </task>
+    <task id="LOCAL-00003" summary="fix2">
+      <option name="closed" value="true" />
+      <created>1704479513303</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1704479513303</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fix3">
+      <option name="closed" value="true" />
+      <created>1704479987362</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1704479987362</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix4">
+      <option name="closed" value="true" />
+      <created>1704480257832</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1704480257832</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fix5">
+      <option name="closed" value="true" />
+      <created>1704480539324</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1704480539324</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="остальные правки" />
+    <MESSAGE value="fix1" />
+    <MESSAGE value="fix2" />
+    <MESSAGE value="fix3" />
+    <MESSAGE value="fix4" />
+    <MESSAGE value="fix5" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix5" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/marketplace_assistant_bot.go</url>
+          <line>352</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/gqlgen/server.go</url>
+          <line>2</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
 </project>

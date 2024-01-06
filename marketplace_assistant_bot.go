@@ -5,6 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/shopspring/decimal"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"gqlgen"
 	"io"
 	"log"
 	"net/http"
@@ -12,14 +21,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"telegram"
 	"time"
-
-	"github.com/gorilla/mux"
-	"github.com/shopspring/decimal"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
@@ -28,267 +31,6 @@ var (
 	urlTelegramBot   string
 	tokenTelegramBot string
 )
-
-type User struct {
-	Id                      int64  `json:"id" bson:"id"`
-	IsBot                   bool   `json:"is_bot" bson:"is_bot"`
-	FirstName               string `json:"first_name" bson:"first_name"`
-	LastName                string `json:"last_name" bson:"last_name"`
-	Username                string `json:"username" bson:"username"`
-	LanguageCode            string `json:"language_code" bson:"language_code"`
-	IsPremium               bool   `json:"is_premium" bson:"is_premium"`
-	AddedToAttachmentMenu   bool   `json:"added_to_attachment_menu" bson:"added_to_attachment_menu"`
-	CanJoinGroups           bool   `json:"can_join_groups" bson:"can_join_groups"`
-	CanReadAllGroupMessages bool   `json:"can_read_all_group_messages" bson:"can_read_all_group_messages"`
-	SupportsInlineQueries   bool   `json:"supports_inline_queries" bson:"supports_inline_queries"`
-}
-
-type ChatPhoto struct {
-	SmallFileId       string `json:"small_file_id"`
-	SmallFileUniqueId string `json:"small_file_unique_id"`
-	BigFileId         string `json:"big_file_id"`
-	BigFileUniqueId   string `json:"big_file_unique_id"`
-}
-
-type File struct {
-	FileId       string `json:"file_id"`
-	FileUniqueId string `json:"file_unique_id"`
-	FileSize     string `json:"file_size"`
-	FilePath     string `json:"file_path"`
-}
-
-type MaskPosition struct {
-	Point  string `json:"point"`
-	XShift string `json:"x_shift"`
-	YShift string `json:"y_shift"`
-	Scale  string `json:"scale"`
-}
-
-type PhotoSize struct {
-	FileId       string `json:"file_id"`
-	FileUniqueId string `json:"file_unique_id"`
-	Width        int64  `json:"width"`
-	Height       int64  `json:"height"`
-	FileSize     int64  `json:"file_size"`
-}
-
-type Sticker struct {
-	FileId           string       `json:"file_id"`
-	FileUniqueId     string       `json:"file_unique_id"`
-	Type             string       `json:"type"`
-	Width            int64        `json:"width"`
-	Height           int64        `json:"height"`
-	IsAnimated       bool         `json:"is_animated"`
-	IsVideo          bool         `json:"is_video"`
-	Thumb            PhotoSize    `json:"thumb"`
-	Emoji            string       `json:"emoji"`
-	SetName          string       `json:"set_name"`
-	PremiumAnimation File         `json:"premium_animation"`
-	MaskPosition     MaskPosition `json:"mask_position"`
-	CustomEmojiId    string       `json:"custom_emoji_id"`
-	FileSize         int64        `json:"file_size"`
-}
-
-type ChatPermissions struct {
-	CanSendMessages       bool `json:"can_send_messages"`
-	CanSendMediaMessages  bool `json:"can_send_media_messages"`
-	CanSendPolls          bool `json:"can_send_polls"`
-	CanSendOtherMessages  bool `json:"can_send_other_messages"`
-	CanAddWebPagePreviews bool `json:"can_add_web_page_previews"`
-	CanChangeInfo         bool `json:"can_change_info"`
-	CanInviteUsers        bool `json:"can_invite_users"`
-	CanPinMessages        bool `json:"can_pin_messages"`
-	CanManageTopics       bool `json:"can_manage_topics"`
-}
-
-type Location struct {
-	Longitude            float64 `json:"longitude"`
-	Latitude             float64 `json:"latitude"`
-	HorizontalAccuracy   float64 `json:"horizontal_accuracy"`
-	LivePeriod           int64   `json:"live_period"`
-	Heading              int64   `json:"heading"`
-	ProximityAlertRadius int64   `json:"proximity_alert_radius"`
-}
-
-type ChatLocation struct {
-	Location Location `json:"location"`
-	Address  string   `json:"address"`
-}
-
-type Chat struct {
-	Id                                 int64           `json:"id"`
-	Type                               string          `json:"type"`
-	Title                              string          `json:"title"`
-	Username                           string          `json:"username"`
-	FirstName                          string          `json:"first_name"`
-	LastName                           string          `json:"last_name"`
-	IsForum                            bool            `json:"is_forum"`
-	Photo                              ChatPhoto       `json:"photo"`
-	ActiveUsernames                    []string        `json:"active_usernames"`
-	EmojiStatusCustomEmojiId           string          `json:"emoji_status_custom_emoji_id"`
-	Bio                                string          `json:"bio"`
-	HasPrivateForwards                 bool            `json:"has_private_forwards"`
-	HasRestrictedVoiceAndVideoMessages bool            `json:"has_restricted_voice_and_video_messages"`
-	JoinToSendMessages                 bool            `json:"join_to_send_messages"`
-	JoinByRequest                      bool            `json:"join_by_request"`
-	Description                        string          `json:"description"`
-	InviteLink                         string          `json:"invite_link"`
-	PinnedMessage                      *Message        `json:"pinned_message"`
-	Permissions                        ChatPermissions `json:"permissions"`
-	SlowModeDelay                      int64           `json:"slow_mode_delay"`
-	MessageAutoDeleteTime              int64           `json:"message_auto_delete_time"`
-	HasProtectedContent                bool            `json:"has_protected_content"`
-	StickerSetName                     string          `json:"sticker_set_name"`
-	CanSetStickerSet                   bool            `json:"can_set_sticker_set"`
-	LinkedChatId                       int64           `json:"linked_chat_id"`
-	Location                           ChatLocation    `json:"location"`
-}
-
-type WebAppData struct {
-	ButtonText string `json:"button_text"`
-	Data       string `json:"data"`
-}
-
-type Message struct {
-	MessageId            int64           `json:"message_id"`
-	MessageThreadId      int64           `json:"message_thread_id"`
-	From                 User            `json:"from" bson:"from"`
-	SenderChat           Chat            `json:"sender_chat"`
-	Date                 int64           `json:"date"`
-	Chat                 Chat            `json:"chat"`
-	ForwardFrom          User            `json:"forward_from"`
-	ForwardFromChat      Chat            `json:"forward_from_chat"`
-	ForwardFromMessageId int64           `json:"forward_from_message_id"`
-	ForwardSignature     string          `json:"forward_signature"`
-	ForwardSenderName    string          `json:"forward_sender_name"`
-	ForwardDate          int64           `json:"forward_date"`
-	IsTopicMessage       bool            `json:"is_topic_message"`
-	IsAutomaticForward   bool            `json:"is_automatic_forward"`
-	ReplyToMessage       *Message        `json:"reply_to_message"`
-	ViaBot               User            `json:"via_bot"`
-	EditDate             int64           `json:"edit_date"`
-	Sticker              Sticker         `json:"sticker"`
-	Text                 string          `json:"text"`
-	Entities             []MessageEntity `json:"entities"`
-	NewChatMembers       []User          `json:"new_chat_members"`
-	LeftChatMember       User            `json:"left_chat_member"`
-	WebAppData           WebAppData      `json:"web_app_data"`
-}
-
-type CallbackQuery struct {
-	Id              string  `json:"id"`
-	From            User    `json:"from"`
-	Message         Message `json:"message"`
-	InlineMessageId string  `json:"inline_message_id"`
-	ChatInstance    string  `json:"chat_instance"`
-	Data            string  `json:"data"`
-	GameShortName   string  `json:"game_short_name"`
-}
-
-type Update struct {
-	UpdateId          int64         `json:"update_id"`
-	Message           Message       `json:"message"`
-	EditedMessage     Message       `json:"edited_message"`
-	ChannelPost       Message       `json:"channel_post"`
-	EditedChannelPost Message       `json:"edited_channel_post"`
-	CallbackQuery     CallbackQuery `json:"callback_query"`
-}
-
-type MessageEntity struct {
-	Type          string `json:"type"`
-	Offset        int64  `json:"offset"`
-	Length        int64  `json:"length"`
-	Url           int64  `json:"url"`
-	User          User   `json:"user"`
-	Language      int64  `json:"language"`
-	CustomEmojiId string `json:"custom_emoji_id"`
-}
-
-type WebAppInfo struct {
-	Url string `json:"url,omitempty"`
-}
-
-type LoginUrl struct {
-	Url                string `json:"url"`
-	ForwardText        string `json:"forward_text"`
-	BotUsername        string `json:"bot_username"`
-	RequestWriteAccess bool   `json:"request_write_access"`
-}
-type InlineKeyboardButton struct {
-	Text                         string      `json:"text"`
-	Url                          string      `json:"url,omitempty"`
-	CallbackData                 string      `json:"callback_data,omitempty"`
-	WebApp                       *WebAppInfo `json:"web_app,omitempty"`
-	LoginUrl                     *LoginUrl   `json:"login_url,omitempty"`
-	SwitchInlineQuery            string      `json:"switch_inline_query,omitempty"`
-	SwitchInlineQueryCurrentChat string      `json:"switch_inline_query_current_chat,omitempty"`
-	Pay                          bool        `json:"pay,omitempty"`
-}
-type KeyboardButtonPollType struct {
-	Type string `json:"type,omitempty"`
-}
-type KeyboardButton struct {
-	Text            string                  `json:"text"`
-	RequestContact  bool                    `json:"request_contact,omitempty"`
-	RequestLocation bool                    `json:"request_location,omitempty"`
-	RequestPoll     *KeyboardButtonPollType `json:"request_poll,omitempty"`
-	WebApp          *WebAppInfo             `json:"web_app,omitempty"`
-}
-type InlineKeyboardMarkup struct {
-	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard,omitempty"`
-}
-type ReplyKeyboardMarkup struct {
-	Keyboard              [][]KeyboardButton `json:"keyboard"`
-	IsPersistent          bool               `json:"is_persistent"`
-	ResizeKeyboard        bool               `json:"resize_keyboard"`
-	OneTimeKeyboard       bool               `json:"one_time_keyboard"`
-	InputFieldPlaceholder string             `json:"input_field_placeholder"`
-	Selective             bool               `json:"selective"`
-}
-type replyMarkup interface {
-	InlineKeyboardMarkup | ReplyKeyboardMarkup
-}
-type chatId interface {
-	int64 | int | string
-}
-type SendMessageRequestBody[T replyMarkup, Q chatId] struct {
-	ChatId                   Q               `json:"chat_id"`
-	MessageThreadId          int64           `json:"message_thread_id"`
-	Text                     string          `json:"text"`
-	ParseMode                string          `json:"parse_mode"`
-	Entities                 []MessageEntity `json:"entities"`
-	DisableWebPagePreview    bool            `json:"disable_web_page_preview"`
-	DisableNotification      bool            `json:"disable_notification"`
-	ProtectContent           bool            `json:"protect_content"`
-	ReplyToMessageId         int64           `json:"reply_to_message_id"`
-	AllowSendingWithoutReply bool            `json:"allow_sending_without_reply"`
-	ReplyMarkup              T               `json:"reply_markup,omitempty"`
-}
-type DeleteMessageRequestBody struct {
-	ChatId    int64 `json:"chat_id"`
-	MessageId int64 `json:"message_id"`
-}
-type EditMessageTextRequestBody struct {
-	ChatId                int64                `json:"chat_id"`
-	MessageId             int64                `json:"message_id"`
-	InlineMessageId       string               `json:"inline_message_id"`
-	Text                  string               `json:"text"`
-	ParseMode             string               `json:"parse_mode"`
-	Entities              MessageEntity        `json:"entities"`
-	DisableWebPagePreview bool                 `json:"disable_web_page_preview"`
-	ReplyMarkup           InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-}
-type EditMessageReplyMarkupRequestBody struct {
-	ChatId          int64                `json:"chat_id"`
-	MessageId       int64                `json:"message_id"`
-	InlineMessageId string               `json:"inline_message_id"`
-	ReplyMarkup     InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-}
-type AnswerCallbackQueryRequestBody struct {
-	CallbackQueryId string `json:"callback_query_id"`
-	Text            string `json:"text"`
-	ShowAlert       bool   `json:"show_alert"`
-}
 
 type FilterFbo struct {
 	Since  string `json:"since"`
@@ -406,10 +148,10 @@ type Settings struct {
 	OzonSetting OzonSetting `bson:"ozon_setting"`
 }
 type TelegramUser struct {
-	NameBot  string   `bson:"name_bot"`
-	User     User     `bson:"user"`
-	Chats    []Chat   `bson:"chats"`
-	Settings Settings `bson:"settings"`
+	NameBot  string          `bson:"name_bot"`
+	User     telegram.User   `bson:"user"`
+	Chats    []telegram.Chat `bson:"chats"`
+	Settings Settings        `bson:"settings"`
 }
 type UserDB struct {
 	Id           primitive.ObjectID `bson:"_id"`
@@ -556,16 +298,35 @@ func main() {
 		port = "8181"
 		log.Printf("Defaulting to port %s", port)
 	}
+	//var configDefault = Config{
+	//	Next:          nil,
+	//	Done:          nil,
+	//	Format:        "[${time}] ${status} - ${latency} ${method} ${path}\n",
+	//	TimeFormat:    "15:04:05",
+	//	TimeZone:      "Local",
+	//	TimeInterval:  500 * time.Millisecond,
+	//	Output:        os.Stdout,
+	//	DisableColors: false,
+	//}
+	app := fiber.New()
+	app.Use(
+		logger.New(), // add Logger middleware
+	)
+	routeGQR := "/query"
+	query, playground := gqlgen.GraphQLPlaygroundHandler(routeGQR)
+	app.Get("/playground", adaptor.HTTPHandlerFunc(playground))
+	app.Post("/query", adaptor.HTTPHandler(query))
+	app.Listen(":" + port)
 
-	router := mux.NewRouter()
-	router.HandleFunc("/webhooks", webHooks)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
-	router.HandleFunc("/", indexHandler)
-	http.Handle("/", router)
+	//router := mux.NewRouter()
+	//router.HandleFunc("/webhooks", webHooks)
+	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
+	//router.HandleFunc("/", indexHandler)
+	//http.Handle("/", router)
 
-	log.Printf("Listening on port %s", port)
-	log.Printf("Open http://localhost:%s in the browser", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	//log.Printf("Listening on port %s", port)
+	//log.Printf("Open http://localhost:%s in the browser", port)
+	//log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
 func connectMongoDB(applyUrI string) *mongo.Client {
@@ -589,7 +350,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func webHooks(w http.ResponseWriter, r *http.Request) {
-	var m Update
+	var m telegram.Update
 	json.NewDecoder(r.Body).Decode(&m)
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
@@ -606,14 +367,14 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		} else {
-			smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 				ChatId: m.Message.Chat.Id,
 				Text:   "ClientId успешно сохранен.",
-				ReplyMarkup: InlineKeyboardMarkup{
-					InlineKeyboard: CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-						{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
-						{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
-						{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+				ReplyMarkup: telegram.InlineKeyboardMarkup{
+					InlineKeyboard: CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+						{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+						{Row: 1, Col: 2, Button: telegram.InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+						{Row: 2, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 					})},
 			}
 			SendMessageToBot(&bot, smm)
@@ -630,13 +391,13 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		} else {
 			sm := TelegramBot{}
-			smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 				ChatId: m.Message.Chat.Id,
 				Text:   "Token успешно сохранен.",
-				ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-					{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
-					{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
-					{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+				ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+					{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+					{Row: 1, Col: 2, Button: telegram.InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+					{Row: 2, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 				})},
 			}
 			SendMessageToBot(&sm, smm)
@@ -658,13 +419,13 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		} else {
 			sm := TelegramBot{}
-			smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 				ChatId: m.Message.Chat.Id,
 				Text:   "Token успешно сохранен.",
-				ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-					{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
-					{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
-					{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+				ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+					{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+					{Row: 1, Col: 2, Button: telegram.InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+					{Row: 2, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 				})},
 			}
 			SendMessageToBot(&sm, smm)
@@ -691,13 +452,13 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		} else {
 			sm := TelegramBot{}
-			smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+			smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 				ChatId: m.Message.Chat.Id,
 				Text:   "Token успешно сохранен.",
-				ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-					{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
-					{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
-					{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+				ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+					{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+					{Row: 1, Col: 2, Button: telegram.InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+					{Row: 2, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 				})},
 			}
 			SendMessageToBot(&sm, smm)
@@ -716,14 +477,14 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 				Id: primitive.NewObjectID(),
 				TelegramUser: TelegramUser{
 					User:  m.Message.From,
-					Chats: []Chat{m.Message.Chat},
+					Chats: []telegram.Chat{m.Message.Chat},
 				}}
 			_, err := coll.InsertOne(context.TODO(), userDB)
 			if err != nil {
 				panic(err)
 			}
 		} else {
-			if result := findIndex[Chat](user.TelegramUser.Chats, func(c Chat) bool {
+			if result := findIndex[telegram.Chat](user.TelegramUser.Chats, func(c telegram.Chat) bool {
 				if c.Id == m.Message.Chat.Id {
 					return true
 				}
@@ -740,141 +501,141 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(ud)
 		}
 		sm := TelegramBot{}
-		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId: m.Message.Chat.Id,
 			Text:   "Добро пожаловать! Чтобы использовать бота необходимо его настроить",
-			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "Перейти к настройкам?", CallbackData: "/settings"}},
+			ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Перейти к настройкам?", CallbackData: "/settings"}},
 			})},
 		}
 		SendMessageToBot(&sm, smm)
 		return
 	}
 	if m.CallbackQuery.Data == "/settings" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
-		smm := EditMessageTextRequestBody{
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		smm := telegram.EditMessageTextRequestBody{
 			ChatId:    m.CallbackQuery.Message.Chat.Id,
 			MessageId: m.CallbackQuery.Message.MessageId,
 			Text:      "Выберите, пожалуйста маркетплейс который вы бы хотели настроить.",
-			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "OZON", CallbackData: "/ozonsetting"}},
-				{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+			ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "OZON", CallbackData: "/ozonsetting"}},
+				{Row: 2, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 			})},
 		}
 		EditMessageTextToBot(&bot, smm)
 	}
 	if mes.Text == "/settings" {
-		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId: mes.Chat.Id,
 			Text:   "Выберите, пожалуйста маркетплейс который вы бы хотели настроить.",
-			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "OZON", CallbackData: "/ozonsetting"}},
+			ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "OZON", CallbackData: "/ozonsetting"}},
 			})},
 		}
 		SendMessageToBot(&bot, smm)
 	}
 	if m.CallbackQuery.Data == "/ozonsetting" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		sm := TelegramBot{}
-		smm := EditMessageTextRequestBody{
+		smm := telegram.EditMessageTextRequestBody{
 			ChatId:    m.CallbackQuery.Message.Chat.Id,
 			MessageId: m.CallbackQuery.Message.MessageId,
 			Text:      "Для получения данных из OZON seller необходимо указать ClientId и Token. Их можно получить в личном кабинете продавца.",
-			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
-				{Row: 1, Col: 2, Button: InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
-				{Row: 3, Col: 1, Button: InlineKeyboardButton{Text: "Настройка локального ценообразования", CallbackData: "/settinglocalpricing"}},
-				{Row: 4, Col: 1, Button: InlineKeyboardButton{Text: "Проверка подключения к Ozon Seller", CallbackData: "/testconnectozonseller"}},
-				{Row: 5, Col: 1, Button: InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
+			ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "ClientId", CallbackData: "/setclientidozonsetting"}},
+				{Row: 1, Col: 2, Button: telegram.InlineKeyboardButton{Text: "Token", CallbackData: "/settokenozonsetting"}},
+				{Row: 3, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Настройка локального ценообразования", CallbackData: "/settinglocalpricing"}},
+				{Row: 4, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Проверка подключения к Ozon Seller", CallbackData: "/testconnectozonseller"}},
+				{Row: 5, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Назад", CallbackData: "/backsettings"}},
 			})},
 		}
 		EditMessageTextToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/settinglocalpricing" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		sm := TelegramBot{}
-		smm := EditMessageTextRequestBody{
+		smm := telegram.EditMessageTextRequestBody{
 			ChatId:    m.CallbackQuery.Message.Chat.Id,
 			MessageId: m.CallbackQuery.Message.MessageId,
 			Text:      "Для получения данных из OZON seller необходимо указать ClientId и Token. Их можно получить в личном кабинете продавца.",
-			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "Внести % сборов OZON", CallbackData: "/setcostozon"}},
-				{Row: 2, Col: 1, Button: InlineKeyboardButton{Text: "Указать закупочную цену групп товаров", CallbackData: "/settingpurchaseprice"}},
+			ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Внести % сборов OZON", CallbackData: "/setcostozon"}},
+				{Row: 2, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Указать закупочную цену групп товаров", CallbackData: "/settingpurchaseprice"}},
 			})},
 		}
 		EditMessageTextToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/settingpurchaseprice" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		set, _ := UserDB{}.getOzonSetting(m.CallbackQuery.From.Id)
-		var buttons []ButtonBot[InlineKeyboardButton]
+		var buttons []telegram.ButtonBot[telegram.InlineKeyboardButton]
 		for i, gp := range set.ProductSetting.GroupProducts {
 			text := fmt.Sprintf("%s (Цена: %s)", gp.NameGroup, decimal.NewFromFloat(gp.PurchasePrice).StringFixed(2))
-			buttons = append(buttons, ButtonBot[InlineKeyboardButton]{
+			buttons = append(buttons, telegram.ButtonBot[telegram.InlineKeyboardButton]{
 				Row:    i + 1,
 				Col:    1,
-				Button: InlineKeyboardButton{Text: text, CallbackData: "/setpurchaseprice-" + gp.NameGroup},
+				Button: telegram.InlineKeyboardButton{Text: text, CallbackData: "/setpurchaseprice-" + gp.NameGroup},
 			})
 		}
 
 		sm := TelegramBot{}
-		smm := EditMessageTextRequestBody{
+		smm := telegram.EditMessageTextRequestBody{
 			ChatId:      m.CallbackQuery.Message.Chat.Id,
 			MessageId:   m.CallbackQuery.Message.MessageId,
 			Text:        "Для получения данных из OZON seller необходимо указать ClientId и Token. Их можно получить в личном кабинете продавца.",
-			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton](buttons)},
+			ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton](buttons)},
 		}
 		EditMessageTextToBot(&sm, smm)
 	}
 	if strings.Contains(m.CallbackQuery.Data, "/setpurchaseprice") {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		Cash[m.CallbackQuery.From.Id+m.CallbackQuery.Message.Chat.Id] = DataCash{LastCommand: m.CallbackQuery.Data}
 		sm := TelegramBot{}
-		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId: m.CallbackQuery.Message.Chat.Id,
 			Text:   "ОК. Пришлите, пожалуйста себистоимость товара.",
 		}
 		SendMessageToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/setcostozon" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		Cash[m.CallbackQuery.From.Id+m.CallbackQuery.Message.Chat.Id] = DataCash{LastCommand: "/setcostozon"}
 		sm := TelegramBot{}
-		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId: m.CallbackQuery.Message.Chat.Id,
 			Text:   "ОК. Пришлите, пожалуйста % расходом на услуги OZON.",
 		}
 		SendMessageToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/settokenozonsetting" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		Cash[m.CallbackQuery.From.Id+m.CallbackQuery.Message.Chat.Id] = DataCash{LastCommand: "/settokenozonsetting"}
 		sm := TelegramBot{}
-		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId: m.CallbackQuery.Message.Chat.Id,
 			Text:   "ОК. Пришлите, пожалуйста Token для бота.",
 		}
 		SendMessageToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/setclientidozonsetting" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		Cash[m.CallbackQuery.From.Id+m.CallbackQuery.Message.Chat.Id] = DataCash{LastCommand: "/setclientidozonsetting"}
 		sm := TelegramBot{}
-		smm := SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		smm := telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId: m.CallbackQuery.Message.Chat.Id,
 			Text:   "ОК. Пришлите, пожалуйста ClientID для бота.",
 		}
 		SendMessageToBot(&sm, smm)
 	}
 	if m.CallbackQuery.Data == "/backsettings" {
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{CallbackQueryId: m.CallbackQuery.Id})
 		sm := TelegramBot{}
-		smm := EditMessageTextRequestBody{
+		smm := telegram.EditMessageTextRequestBody{
 			ChatId:    m.CallbackQuery.Message.Chat.Id,
 			MessageId: m.CallbackQuery.Message.MessageId,
 			Text:      "Настроить бота?",
-			ReplyMarkup: InlineKeyboardMarkup{CreateButtonsBot[InlineKeyboardButton]([]ButtonBot[InlineKeyboardButton]{
-				{Row: 1, Col: 1, Button: InlineKeyboardButton{Text: "Да", CallbackData: "/settings"}},
+			ReplyMarkup: telegram.InlineKeyboardMarkup{CreateButtonsBot[telegram.InlineKeyboardButton]([]telegram.ButtonBot[telegram.InlineKeyboardButton]{
+				{Row: 1, Col: 1, Button: telegram.InlineKeyboardButton{Text: "Да", CallbackData: "/settings"}},
 			})},
 		}
 		EditMessageTextToBot(&sm, smm)
@@ -887,20 +648,20 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		answerCallbackQueryToBot(&bot, AnswerCallbackQueryRequestBody{
+		answerCallbackQueryToBot(&bot, telegram.AnswerCallbackQueryRequestBody{
 			CallbackQueryId: m.CallbackQuery.Id,
 			Text:            checkAuthOzonSeller(user.TelegramUser.Settings.OzonSetting.ClientId, user.TelegramUser.Settings.OzonSetting.Token),
 			ShowAlert:       false,
 		})
-		SendMessageToBot(&bot, SendMessageRequestBody[ReplyKeyboardMarkup, int64]{
+		SendMessageToBot(&bot, telegram.SendMessageRequestBody[telegram.ReplyKeyboardMarkup, int64]{
 			ChatId: m.CallbackQuery.Message.Chat.Id,
 			Text:   "sdfsf",
-			ReplyMarkup: ReplyKeyboardMarkup{Keyboard: CreateButtonsBot[KeyboardButton]([]ButtonBot[KeyboardButton]{
-				{Row: 1, Col: 1, Button: KeyboardButton{Text: GenReportArbitraryDate.String(), WebApp: &WebAppInfo{
+			ReplyMarkup: telegram.ReplyKeyboardMarkup{Keyboard: CreateButtonsBot[telegram.KeyboardButton]([]telegram.ButtonBot[telegram.KeyboardButton]{
+				{Row: 1, Col: 1, Button: telegram.KeyboardButton{Text: GenReportArbitraryDate.String(), WebApp: &telegram.WebAppInfo{
 					Url: "https://bot.my-infant.com/static/",
 				}}},
-				{Row: 2, Col: 1, Button: KeyboardButton{Text: GenReportToday.String()}},
-				{Row: 2, Col: 2, Button: KeyboardButton{Text: GenReportYesterday.String()}},
+				{Row: 2, Col: 1, Button: telegram.KeyboardButton{Text: GenReportToday.String()}},
+				{Row: 2, Col: 2, Button: telegram.KeyboardButton{Text: GenReportYesterday.String()}},
 			}),
 				ResizeKeyboard: true},
 		})
@@ -913,7 +674,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			To:     time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Format(time.RFC3339),
 		}
 
-		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		SendMessageToBot(&bot, telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
 			ParseMode: "HTML", //TODO приминить паттерн стратегия
 			Text:      printOrderSummaryReport(marketplace.orderSummaryReport(m.Message.From.Id, filter)),
@@ -926,7 +687,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			Status: "",
 			To:     time.Now().Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Add(-(24 * time.Hour)).Format(time.RFC3339),
 		}
-		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		SendMessageToBot(&bot, telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
 			ParseMode: "HTML", //TODO приминить паттерн стратегия
 			Text:      printOrderSummaryReport(marketplace.orderSummaryReport(m.Message.From.Id, filter)),
@@ -942,7 +703,7 @@ func webHooks(w http.ResponseWriter, r *http.Request) {
 			Status: "",
 			To:     to.Truncate(24 * time.Hour).UTC().Add(-(4 * time.Hour)).Add(24 * time.Hour).Add(-(24 * time.Hour)).Format(time.RFC3339),
 		}
-		SendMessageToBot(&bot, SendMessageRequestBody[InlineKeyboardMarkup, int64]{
+		SendMessageToBot(&bot, telegram.SendMessageRequestBody[telegram.InlineKeyboardMarkup, int64]{
 			ChatId:    mes.Chat.Id,
 			ParseMode: "HTML", //TODO приминить паттерн стратегия
 			Text:      printOrderSummaryReport(marketplace.orderSummaryReport(m.Message.From.Id, filter)),
@@ -980,16 +741,7 @@ func printOrderSummaryReport(c СonsolidatedReportFBO) string {
 	return mess
 }
 
-type buttonTelegrmBot interface {
-	InlineKeyboardButton | KeyboardButton
-}
-type ButtonBot[T buttonTelegrmBot] struct {
-	Row    int
-	Col    int
-	Button T
-}
-
-func CreateButtonsBot[Q buttonTelegrmBot](b []ButtonBot[Q]) [][]Q {
+func CreateButtonsBot[Q telegram.ButtonTelegrmBot](b []telegram.ButtonBot[Q]) [][]Q {
 	sort.Slice(b, func(i, j int) bool {
 		return b[i].Row < b[j].Row
 	})
@@ -1046,7 +798,7 @@ func (t *TelegramBot) deleteMessage(body interface{}) bool {
 func (t *TelegramBot) editMessageText(body interface{}) bool {
 	client := &http.Client{}
 	command := "editMessageText"
-	if _, ok := body.(EditMessageReplyMarkupRequestBody); ok {
+	if _, ok := body.(telegram.EditMessageReplyMarkupRequestBody); ok {
 		command = "editMessageReplyMarkup"
 	}
 	requestBody, err := json.Marshal(&body)
