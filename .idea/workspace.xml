@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="fix4" />
+    <list default="true" id="09111b7c-a576-41a4-afb2-2eb80fe844a5" name="Changes" comment="fix5">
+      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/marketplace-assistant-bot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/go-build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/go-build.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.work" beforeDir="false" afterPath="$PROJECT_DIR$/go.work" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.work.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.work.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gqlgen/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen/go.sum" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,6 +38,9 @@
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="true" />
   </component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -46,6 +60,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "DefaultGoTemplateProperty": "Go Application",
+    "Docker.Dockerfile.executor": "Run",
     "Go Build.go build gqlgen.executor": "Run",
     "Go Build.go build marketplace-assistant-bot.executor": "Run",
     "Go Test.TestTelegramBot_addBot in db.executor": "Run",
@@ -78,7 +93,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build marketplace-assistant-bot">
+  <component name="RunManager" selected="Docker.Dockerfile">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="marketplace-assistant-bot" />
       <working_directory value="$PROJECT_DIR$" />
@@ -130,17 +145,6 @@
       <pattern value="^\QTestTelegramBot_addBot\E$/^\QДобавление_бота\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestTelegramBot_listBots/Добавление_бота in db" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="db" />
-      <working_directory value="$PROJECT_DIR$/db" />
-      <kind value="PACKAGE" />
-      <package value="db" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestTelegramBot_listBots\E$/^\QДобавление_бота\E$" />
-      <method v="2" />
-    </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="marketplace-assistant-bot" />
       <working_directory value="$PROJECT_DIR$" />
@@ -150,20 +154,41 @@
       <framework value="gotest" />
       <method v="2" />
     </configuration>
+    <configuration name="Dockerfile" type="docker-deploy" factoryName="dockerfile" temporary="true" server-name="Docker">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="portBindings">
+            <list>
+              <DockerPortBindingImpl>
+                <option name="containerPort" value="8181" />
+                <option name="hostIp" value="0.0.0.0" />
+                <option name="hostPort" value="8181" />
+              </DockerPortBindingImpl>
+            </list>
+          </option>
+          <option name="sourceFilePath" value="Dockerfile" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
+      <deployment type="dockerfile" />
+      <method v="2" />
+    </configuration>
     <list>
+      <item itemvalue="Docker.Dockerfile" />
       <item itemvalue="Go Build.go build gqlgen" />
       <item itemvalue="Go Build.go build marketplace-assistant-bot" />
       <item itemvalue="Go Test.TestTelegramBot_addBot in db" />
-      <item itemvalue="Go Test.TestTelegramBot_listBots/Добавление_бота in db" />
       <item itemvalue="Go Test.TestTelegramBot_addBot/Добавление_бота in db" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Docker.Dockerfile" />
         <item itemvalue="Go Build.go build marketplace-assistant-bot" />
         <item itemvalue="Go Build.go build gqlgen" />
         <item itemvalue="Go Test.TestTelegramBot_addBot/Добавление_бота in db" />
         <item itemvalue="Go Test.TestTelegramBot_addBot in db" />
-        <item itemvalue="Go Test.TestTelegramBot_listBots/Добавление_бота in db" />
       </list>
     </recent_temporary>
   </component>
@@ -177,7 +202,7 @@
       <updated>1703410458247</updated>
       <workItem from="1703410462396" duration="19597000" />
       <workItem from="1703672504033" duration="90000" />
-      <workItem from="1703672613859" duration="28425000" />
+      <workItem from="1703672613859" duration="37683000" />
     </task>
     <task id="LOCAL-00001" summary="остальные правки">
       <option name="closed" value="true" />
@@ -219,7 +244,15 @@
       <option name="project" value="LOCAL" />
       <updated>1704480257832</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="fix5">
+      <option name="closed" value="true" />
+      <created>1704480539324</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1704480539324</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -243,7 +276,8 @@
     <MESSAGE value="fix2" />
     <MESSAGE value="fix3" />
     <MESSAGE value="fix4" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix4" />
+    <MESSAGE value="fix5" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix5" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
