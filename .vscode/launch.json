@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Package",
+            "name": "Запуск",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}",
+            "program": "${workspaceFolder}/marketplace_assistant_bot.go",
             "env": {
                 "TOKEN_TELEGRAM_BOT": "5795687183:AAHw5BQfZT8lBR-L6vzKe0f9HJ4tFKt__yY",
             }
