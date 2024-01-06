@@ -12,4 +12,5 @@ services:
 
 networks:
   tradinghousestar:
-    driver: bridge
+    name: tradinghousestar
+    external: true
