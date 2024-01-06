@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  marketplaceassistantbot:
+    image: ghcr.io/pavluninvladimir/marketplace-assistant-bot:latest
+    env_file:
+      - stack.env
+    networks:
+      - tradinghousestar
+    ports:
+      - "8080:8080"
+
+networks:
+  tradinghousestar:
+    driver: bridge
