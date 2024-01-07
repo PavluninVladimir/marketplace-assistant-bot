@@ -13,3 +13,4 @@ services:
 networks:
   marketplaceassistantbot:
     name: tradinghousestar
+    external: true
