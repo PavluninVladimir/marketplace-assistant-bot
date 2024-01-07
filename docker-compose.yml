@@ -6,11 +6,10 @@ services:
     env_file:
       - stack.env
     networks:
-      - tradinghousestar
+      - marketplaceassistantbot
     ports:
       - "8080:8080"
 
 networks:
-  tradinghousestar:
+  marketplaceassistantbot:
     name: tradinghousestar
-    external: true
