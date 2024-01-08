@@ -32,6 +32,27 @@ var (
 	tokenTelegramBot string
 )
 
+type SupplierStocksApi struct {
+	LastChangeDate   string `json:"lastChangeDate" validate:"date-time"`
+	WarehouseName    string `json:"warehouseName" validate:"max=50"`
+	SupplierArticle  string `json:"supplierArticle" validate:"max=75"`
+	NmId             int    `json:"nmId"`
+	Barcode          string `json:"barcode" validate:"max=30"`
+	Quantity         int    `json:"quantity"`
+	InWayToClient    int    `json:"inWayToClient"`
+	InWayFromClient  int    `json:"inWayFromClient"`
+	QuantityFull     int    `json:"quantityFull"`
+	Category         string `json:"category" validate:"max=50"`
+	Subject          string `json:"subject" validate:"max=50"`
+	Brand            string `json:"brand" validate:"max=50"`
+	TechSize         string `json:"techSize" validate:"max=30"`
+	Price            float64 `json:"price"`
+	Discount         float64 `json:"discount"`
+	IsSupply         bool    `json:"isSupply"`
+	IsRealization    bool    `json:"isRealization"`
+	SCCode           string `json:"SCCode" validate:"max=50"`
+}
+
 type FilterFbo struct {
 	Since  string `json:"since"`
 	Status string `json:"status"`
@@ -327,6 +348,31 @@ func main() {
 	//log.Printf("Listening on port %s", port)
 	//log.Printf("Open http://localhost:%s in the browser", port)
 	//log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+}
+
+func getDataProductWB() {
+	// req.Header.Add("Authorization","eyJhbGciOiJFUzI1NiIsImtpZCI6IjIwMjMxMjI1djEiLCJ0eXAiOiJKV1QifQ.eyJlbnQiOjEsImV4cCI6MTcyMDEzNDM0MiwiaWQiOiIzMzU5MDg1ZS02YmM4LTQxZTQtYTcxNy1iNjgzZjQ4MGZiMGEiLCJpaWQiOjQ2MzE0MzksIm9pZCI6NTI5NjAyLCJzIjo1MTAsInNpZCI6ImVjYzJkZTUyLThmNjAtNDc3MC04Mjg0LThjMDQ3Yjc4YzNlMCIsInQiOmZhbHNlLCJ1aWQiOjQ2MzE0Mzl9.9Q5jApcvc7gw9LPro2JXLPXm9A9VELgwfItdznBuMUciqzOg7GIAtld11v9tLiBtKWIzuVDwaNTA-utXwAHG5A")
+	agent := fiber.Get("https://statistics-api.wildberries.ru/api/v1/supplier/stocks?dateFrom=2019-06-20")
+    agent.Add("Authorization","eyJhbGciOiJFUzI1NiIsImtpZCI6IjIwMjMxMjI1djEiLCJ0eXAiOiJKV1QifQ.eyJlbnQiOjEsImV4cCI6MTcyMDEzNDM0MiwiaWQiOiIzMzU5MDg1ZS02YmM4LTQxZTQtYTcxNy1iNjgzZjQ4MGZiMGEiLCJpaWQiOjQ2MzE0MzksIm9pZCI6NTI5NjAyLCJzIjo1MTAsInNpZCI6ImVjYzJkZTUyLThmNjAtNDc3MC04Mjg0LThjMDQ3Yjc4YzNlMCIsInQiOmZhbHNlLCJ1aWQiOjQ2MzE0Mzl9.9Q5jApcvc7gw9LPro2JXLPXm9A9VELgwfItdznBuMUciqzOg7GIAtld11v9tLiBtKWIzuVDwaNTA-utXwAHG5A")
+	statusCode, body, errs := agent.Bytes()
+	// if len(errs) > 0 {
+    //     return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+    //         "errs": errs,
+    //     })
+    // }
+	fmt.Print(errs)
+    var something []SupplierStocksApi
+    json.Unmarshal(body, &something)
+	ss := agent.JSON(something)
+	fmt.Print(ss)
+	fmt.Print(statusCode)
+    // if err != nil {
+    //     return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+    //         "err": err,
+    //     })
+    // }
+
+    // return c.Status(statusCode).JSON(something)
 }
 
 func connectMongoDB(applyUrI string) *mongo.Client {

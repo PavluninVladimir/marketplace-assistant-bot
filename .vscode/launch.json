@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Тестирование",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/db",
+            "args": [
+                "-test.run",
+                "MyTestFunction"
+            ]
+        },
+        {
             "name": "Запуск",
             "type": "go",
             "request": "launch",

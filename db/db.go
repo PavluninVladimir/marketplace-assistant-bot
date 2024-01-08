@@ -14,7 +14,7 @@ type Bot interface {
 	//listUsers()
 }
 
-type connectDB interface {
+type ConnectDB interface {
 	connDb()
 }
 
@@ -42,7 +42,7 @@ func connDB() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	err = conDB.AutoMigrate(&TelegramBot{})
+	//err = conDB.AutoMigrate(&TelegramBot{})
 	//if err != nil {
 	//	return
 	//}
